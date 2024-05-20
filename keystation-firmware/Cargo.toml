@@ -1,0 +1,46 @@
+[package]
+name = "keystation-firmware"
+version = "0.1.0"
+edition = "2021"
+
+[[bin]]
+name = "keystation-firmware"
+test = false
+bench = false
+
+[dependencies]
+ufmt = "0.2.0"
+nb = "1.1.0"
+embedded-hal = "1.0.0"
+panic-serial = { version = "0.1.2", features = ["full"] }
+
+[dependencies.arduino-hal]
+git = "https://github.com/rahix/avr-hal"
+rev = "3e362624547462928a219c40f9ea8e3a64f21e5f"
+features = ["arduino-nano"]
+
+[dependencies.avr-device]
+version = "0.5.4"
+
+# The latest releases of `proc-macro2` do not support the rust toolchain that
+# we use.  Thus, we must fix this dependency to an older version where our
+# toolchain is still supported.  See https://github.com/Rahix/avr-hal/issues/537
+[build-dependencies.proc-macro2]
+version = "=1.0.79"
+
+# Configure the build for minimal size - AVRs have very little program memory
+[profile.dev]
+panic = "abort"
+lto = true
+opt-level = "s"
+
+# https://github.com/Rahix/avr-hal/issues/131
+[profile.dev.package.compil1er_builtins]
+overflow-checks = false
+
+[profile.release]
+panic = "abort"
+codegen-units = 1
+debug = true
+lto = true
+opt-level = "s"

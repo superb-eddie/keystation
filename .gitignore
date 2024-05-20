@@ -1,0 +1,9 @@
+.DS_Store
+.idea/
+
+/**/target/
+/.toolchains/
+*.sparsebundle
+
+# Contains hardware references. A lot of pictures and other binary files
+hardware/
