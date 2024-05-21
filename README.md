@@ -34,6 +34,7 @@ cargo install ravedude
   - send keystrokes + velocity out the serial port
 - can be done on pi 2
   - get arm build of vcv-rack working
+    - ref: https://github.com/DISTRHO/Cardinal#current-builds
   - get linux build + bootload + sdcard formatter working for PI
   - build small init process to run vcvrack + screen + midi
 - requires pi 4
