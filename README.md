@@ -20,12 +20,16 @@ An attempt to replace the guts of a non-functioning M-Audio Keystation 49e
 sudo apt install git build-essential gcc g++ gperf bison \ 
   flex texinfo help2man make libncurses5-dev python3-dev \
   autoconf automake libtool libtool-bin gawk wget bzip2 \
-  xz-utils unzip patch libstdc++6 rsync meson ninja-build
+  xz-utils unzip patch libstdc++6 rsync meson ninja-build \
+  pkg-config libudev-dev avrdude
+  
+# Install rust
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+cargo install ravedude
 ```
 
 ## Next steps
 - arduino side:
-    - More options should be moved into the target.json (panic strategy)
   - increase velocity measurement accuracy
   - send keystrokes + velocity out the serial port
 - can be done on pi 2
