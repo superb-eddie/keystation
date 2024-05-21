@@ -1,25 +1,12 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-for cmd in wget; do
-  if ! command -v $cmd &> /dev/null; then
-    echo "${cmd} not found"
-    exit 1
-  fi
-done
-
-project_root="$(dirname "$(realpath "$0")")"
-
-toolchains_dir="${project_root}/.toolchains"
-
-avr_toolchain_dir="${toolchains_dir}/avr"
+toolchains_dir="${KSB_PROJECT_ROOT}/.toolchains"
 
 crosstool_prefix_dir="${toolchains_dir}/crosstool-ng"
 crosstool_version="crosstool-ng-1.26.0"
 crosstool_source_dir="${toolchains_dir}/crosstool-ng-${crosstool_version}"
 crosstool_git_url="git@github.com:crosstool-ng/crosstool-ng.git"
-#crosstool_tarball="crosstool-ng-${crosstool_version}.tar.xz"
-#crosstool_tarball_url="http://crosstool-ng.org/download/crosstool-ng/${crosstool_tarball}"
 
 redownload_crosstool="false"
 rebuild_crosstool="false"
@@ -60,6 +47,10 @@ done
 
 mkdir -p "${toolchains_dir}"
 
+function shell_title() {
+  echo -ne "\033]0;$1\007"
+}
+
 function init_crosstool() {
   if  [ "${redownload_crosstool}" == "true" ] || [ ! -d "${crosstool_source_dir}" ]; then
     echo "Downloading crosstool-ng"
@@ -70,6 +61,7 @@ function init_crosstool() {
   fi
 
   if [ "${rebuild_crosstool}" == "true" ] || [ ! -d "${crosstool_prefix_dir}" ]; then
+    shell_title "Building Crosstool"
     rm -rf "${crosstool_prefix_dir}"
 
     pushd "${crosstool_source_dir}"
@@ -86,6 +78,26 @@ function init_crosstool() {
     popd
     popd
   fi
+  shell_title ""
+}
+
+function use_toolchain_script() {
+  toolchain_sysroot="${1}"
+  toolchain_script_path="${2}"
+
+# Should we set?
+# - CC
+# - CXX
+# - AR
+# - FC
+# - LD
+  cat << EOF > "${toolchain_script_path}"
+#!/usr/bin/env bash
+set -euo pipefail
+
+export PATH="${toolchain_sysroot}/bin:\${PATH}"
+EOF
+  chmod +x "${toolchain_script_path}"
 }
 
 function init_toolchain() {
@@ -96,11 +108,17 @@ function init_toolchain() {
     return 0
   fi
 
-  rm -rf "${toolchains_dir}/${toolchain_name:?}"
-  rm -rf "${toolchains_dir}/${toolchain_name}-build"
-  mkdir -p "${toolchains_dir}/${toolchain_name}-build"
+  shell_title "Building ${toolchain_name}"
 
-  pushd "${toolchains_dir}/${toolchain_name}-build"
+  toolchain_output_dir="${toolchains_dir}/${toolchain_name:?}"
+  toolchain_build_dir="${toolchains_dir}/${toolchain_name}-build"
+
+# TODO: Can't always remove old dirs?
+  rm -rf "${toolchain_output_dir}"
+  rm -rf "${toolchain_build_dir}"
+  mkdir -p "${toolchain_build_dir}"
+
+  pushd "${toolchain_build_dir}"
 
   export CT_PREFIX="${toolchains_dir}"
   export PATH="${crosstool_prefix_dir}/bin:$PATH"
@@ -108,6 +126,10 @@ function init_toolchain() {
   ct-ng build
 
   popd
+
+  use_toolchain_script "${toolchain_output_dir}" "${toolchains_dir}/use-${toolchain_name}.sh"
+
+  shell_title ""
 }
 
 init_crosstool

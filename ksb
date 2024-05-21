@@ -1,0 +1,25 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# KSB: Key station builder
+
+export KSB_PROJECT_ROOT="$(dirname "$(realpath "$0")")"
+
+function build() {
+  target="${1}"
+
+  case "${target}" in
+    toolchains)
+      "${KSB_PROJECT_ROOT}/ksb-build-toolchains.sh" "${@:1}"
+    ;;
+    firmware)
+      build toolchains
+      . "${KSB_PROJECT_ROOT}/.toolchains/use-avr.sh"
+      pushd "${KSB_PROJECT_ROOT}/keystation-firmware/"
+      cargo build
+      popd
+    ;;
+  esac
+}
+
+build "${@:1}"
