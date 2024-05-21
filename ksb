@@ -4,29 +4,66 @@ set -euo pipefail
 # KSB: Key station builder
 
 export KSB_PROJECT_ROOT="$(dirname "$(realpath "$0")")"
+export KSB_SCRIPTS_DIR="${KSB_PROJECT_ROOT}/ksb-scripts"
+export KSB_SCRIPTS_LIB_DIR="${KSB_SCRIPTS_DIR}/lib"
+export KSB_WORK_DIR="${KSB_PROJECT_ROOT}/.ksb"
+export KSB_BUILD_DIR="${KSB_WORK_DIR}/build"
+export KSB_CACHE_DIR="${KSB_WORK_DIR}/cache"
+export KSB_VENDOR_DIR="${KSB_WORK_DIR}/vendor"
 
-function ksb() {
-  target="${1}"
+export PATH="${KSB_SCRIPTS_DIR}:${PATH}"
 
-  case "${target}" in
-    toolchains)
-      "${KSB_PROJECT_ROOT}/ksb-toolchains.sh" "${@:2}"
-    ;;
-    firmware)
-      if [[ "${2}" != "clean" ]]; then
-        ksb toolchains
-        . "${KSB_PROJECT_ROOT}/.toolchains/use-avr.sh"
-      fi
+source "${KSB_SCRIPTS_LIB_DIR}/logging.sh"
 
-      pushd "${KSB_PROJECT_ROOT}/keystation-firmware/"
-      cargo "${@:2}"
-      popd
-    ;;
-    clean)
-      ksb toolchains --clean
-      ksb firmware clean
-    ;;
-  esac
-}
+if ! which jq >/dev/null; then
+	log_fatal "Please install jq!"
+fi
 
-ksb "${@:1}"
+cmd="${1:-help}"
+ksb_command="ksb-$cmd"
+if ! which "${ksb_command}" > /dev/null; then
+    log_fatal "Unknown command $cmd"
+fi
+
+if [[ "${KSB_NO_LOCK:-}" == "buildroot" ]]; then
+    # This is only to be used with buildroot hooks
+    # Don't do something stupid
+    "${ksb_command}" "${@:2}"
+    exit $?
+fi
+
+mkdir -p "${KSB_WORK_DIR}"
+{
+    if ! flock -n 9; then
+        log_fatal "Could not obtain lock"
+    fi
+
+    "${ksb_command}" "${@:2}"
+} 9>"${KSB_WORK_DIR}/.ksb_lock"
+
+
+#function ksb() {
+#  target="${1}"
+#
+#  case "${target}" in
+#    toolchains)
+#      "${KSB_PROJECT_ROOT}/ksb-toolchains.sh" "${@:2}"
+#    ;;
+#    firmware)
+#      if [[ "${2}" != "clean" ]]; then
+#        ksb toolchains
+#        . "${KSB_PROJECT_ROOT}/.toolchains/use-avr.sh"
+#      fi
+#
+#      pushd "${KSB_PROJECT_ROOT}/keystation-firmware/"
+#      cargo "${@:2}"
+#      popd
+#    ;;
+#    clean)
+#      ksb toolchains --clean
+#      ksb firmware clean
+#    ;;
+#  esac
+#}
+#
+#ksb "${@:1}"

@@ -1,0 +1,115 @@
+#!/usr/bin/env bash
+#-Help: Download and patch vendored dependencies
+source "${KSB_SCRIPTS_LIB_DIR}/logging.sh"
+source "${KSB_SCRIPTS_LIB_DIR}/json.sh"
+source "${KSB_SCRIPTS_LIB_DIR}/vendor/git.sh"
+source "${KSB_SCRIPTS_LIB_DIR}/vendor/tar.sh"
+
+function should_update() {
+    case "${1}" in
+    "git")
+        git_should_update "${@:2}"
+        ;;
+    "tar")
+        tar_should_update "${@:2}"
+        ;;
+    *)
+        log_red "Vendor type ${1} is not supported"
+        exit 1
+        ;;
+    esac
+}
+
+function update() {
+    case "${1}" in
+    "git")
+        git_update "${@:2}"
+        ;;
+    "tar")
+        tar_update "${@:2}"
+        ;;
+    *)
+        log_red "Vendor type ${1} is not supported"
+        exit 1
+        ;;
+    esac
+}
+
+function download() {
+    case "${1}" in
+    "git")
+        git_download "${@:2}"
+        ;;
+    "tar")
+        tar_download "${@:2}"
+        ;;
+    *)
+        log_red "Vendor type ${1} is not supported"
+        exit 1
+        ;;
+    esac
+}
+
+ksb_vendor_file="${KSB_PROJECT_ROOT}/vendor.json"
+ksb_vendor_stamp="${KSB_VENDOR_DIR}/.stamp"
+
+if [ -f "${ksb_vendor_stamp}" ]; then
+    if [ "${ksb_vendor_stamp}" -nt "${ksb_vendor_file}" ]; then
+        log_warning "Skipping vendor update, stamp is newer"
+        exit 0
+    fi
+fi
+mkdir -p "${KSB_VENDOR_DIR}"
+touch "${ksb_vendor_stamp}"
+
+json_query_file_array "${ksb_vendor_file}" VENDOR '.[]'
+for dep in "${VENDOR[@]}"; do
+    dep_name="$(json_query_blob "${dep}" '.name')"
+    dep_type="$(json_query_blob "${dep}" '.type')"
+    dep_url="$(json_query_blob "${dep}" '.url')"
+    dep_version="$(json_query_blob "${dep}" '.version')"
+    dep_patches="$(json_query_blob "${dep}" '.patches // []')"
+
+    dep_dir="${KSB_VENDOR_DIR}/${dep_name}"
+
+    action_needed=""
+    if [ -d "${dep_dir}" ]; then
+        if should_update "${dep_type}" "${dep_dir}" "${dep_version}" "${dep_url}"; then
+            action_needed="update"
+        else
+            action_needed="nothing"
+        fi
+    else
+        action_needed="download"
+    fi
+
+    case "${action_needed}" in
+    "update")
+        log_action "UPDATE" "${dep_name} (${dep_type})"
+        update "${dep_type}" "${dep_dir}" "${dep_version}" "${dep_url}"
+
+        if [[ "${dep_patches}" != "[]" ]]; then
+            log_warning "Updating a dependency with patches may not work properly!"
+        fi
+
+        ;;
+    "download")
+        log_action "DOWNLOAD" "${dep_name} (${dep_type})"
+        if [ ! -d "$(dirname "${dep_dir}")" ]; then
+            mkdir -p "$(dirname "${dep_dir}")"
+        fi
+
+        download "${dep_type}" "${dep_dir}" "${dep_version}" "${dep_url}"
+
+        if [[ "${dep_patches}" != "[]" ]]; then
+            json_array_into PATCHES "${dep_patches}"
+            for dep_patch in "${PATCHES[@]}"; do
+                log_action "PATCH" "$(basename "${dep_patch}")"
+                patch -p1 -d "${dep_dir}" < "${KSB_PROJECT_ROOT}/${dep_patch}"
+            done
+        fi
+        ;;
+    "nothing")
+        ;;
+    esac
+done

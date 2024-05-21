@@ -21,7 +21,7 @@ sudo apt install git build-essential gcc g++ gperf bison \
   flex texinfo help2man make libncurses5-dev python3-dev \
   autoconf automake libtool libtool-bin gawk wget bzip2 \
   xz-utils unzip patch libstdc++6 rsync meson ninja-build \
-  pkg-config libudev-dev avrdude
+  pkg-config libudev-dev avrdude jq
   
 # Install rust
 curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh

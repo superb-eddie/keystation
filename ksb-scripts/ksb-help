@@ -1,0 +1,48 @@
+#!/usr/bin/env bash
+#-Help: Prints this help message
+
+set -euo pipefail
+source "${KSB_SCRIPTS_LIB_DIR}/logging.sh"
+source "${KSB_SCRIPTS_LIB_DIR}/json.sh"
+source "${KSB_SCRIPTS_LIB_DIR}/frontmatter.sh"
+
+ANSI_BOLD="\033[1m"
+ANSI_ITALIC="\033[3m"
+ANSI_RESET="\033[0m"
+
+help_text="Keystation Builder\n"
+function add_command() {
+    name="${1}"
+    json_frontmatter="${2}"
+
+    help="$(json_query_blob "${json_frontmatter}" '.help')"
+    nohelp="$(json_query_blob "${json_frontmatter}" '.nohelp')"
+    use="$(json_query_blob "${json_frontmatter}" '.use')"
+
+    if [[ "$nohelp" != "null" ]]; then
+        return
+    fi
+
+    if [[ "$help" == "null" ]]; then
+        log_fatal "${name} is missing help text!"
+    fi
+
+    if [[ "$use" != "null" ]]; then
+        help_text+="  ${name} ${use}"
+    else
+        help_text+="  ${name}"
+    fi
+    help_text+=" - ${ANSI_ITALIC}${help}${ANSI_RESET} \n"
+}
+
+for cmd_path in "${KSB_SCRIPTS_DIR}"/ksb-*; do
+    # cmd_display="$(echo "${cmd}" | sed -e 's,-, ,')"
+    cmd="$(basename "${cmd_path}")"
+    cmd_display="${cmd//-/ }"
+
+    frontmatter="$(get_frontmatter "${cmd_path}")"
+
+    add_command "${cmd_display}" "${frontmatter}"
+done
+
+echo -e "${help_text}"
