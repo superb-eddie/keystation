@@ -14,6 +14,13 @@ rebuild_avr="false"
 rebuild_rpi="false"
 while [ "$#" -gt 0 ]; do
   case "$1" in
+  --clean)
+    if [[ -d "${toolchains_dir}" ]]; then
+      chmod -R +w "${toolchains_dir}"
+      rm -rf "${toolchains_dir}"
+    fi
+    exit 0
+    ;;
   --redownload)
     redownload_crosstool="true"
     rebuild_crosstool="true"
@@ -113,8 +120,10 @@ function init_toolchain() {
   toolchain_output_dir="${toolchains_dir}/${toolchain_name:?}"
   toolchain_build_dir="${toolchains_dir}/${toolchain_name}-build"
 
-# TODO: Can't always remove old dirs?
-  rm -rf "${toolchain_output_dir}"
+  if [[ -d "${toolchain_output_dir}" ]]; then
+    chmod -R +w "${toolchain_output_dir}"
+    rm -rf "${toolchain_output_dir}"
+  fi
   rm -rf "${toolchain_build_dir}"
   mkdir -p "${toolchain_build_dir}"
 

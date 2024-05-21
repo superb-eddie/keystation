@@ -13,11 +13,18 @@ function ksb() {
       "${KSB_PROJECT_ROOT}/ksb-toolchains.sh" "${@:2}"
     ;;
     firmware)
-      ksb toolchains
-      . "${KSB_PROJECT_ROOT}/.toolchains/use-avr.sh"
+      if [[ "${2}" != "clean" ]]; then
+        ksb toolchains
+        . "${KSB_PROJECT_ROOT}/.toolchains/use-avr.sh"
+      fi
+
       pushd "${KSB_PROJECT_ROOT}/keystation-firmware/"
       cargo "${@:2}"
       popd
+    ;;
+    clean)
+      ksb toolchains --clean
+      ksb firmware clean
     ;;
   esac
 }
