@@ -28,18 +28,19 @@ version = "0.5.4"
 [build-dependencies.proc-macro2]
 version = "=1.0.79"
 
+# https://github.com/Rahix/avr-hal/issues/131
+#[profile.dev.package.compiler_builtins]
+#overflow-checks = false
+#
+#[profile.release.package.compiler_builtins]
+#overflow-checks = false
+
 # Configure the build for minimal size - AVRs have very little program memory
 [profile.dev]
-panic = "abort"
 lto = true
 opt-level = "s"
 
-# https://github.com/Rahix/avr-hal/issues/131
-[profile.dev.package.compil1er_builtins]
-overflow-checks = false
-
 [profile.release]
-panic = "abort"
 codegen-units = 1
 debug = true
 lto = true

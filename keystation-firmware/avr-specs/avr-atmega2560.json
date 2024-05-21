@@ -14,6 +14,7 @@
   "llvm-target": "avr-unknown-unknown",
   "max-atomic-width": 8,
   "no-default-libraries": false,
+  "panic-strategy": "abort",
   "pre-link-args": {
     "gcc": [
       "-mmcu=atmega2560"
