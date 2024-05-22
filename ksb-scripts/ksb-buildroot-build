@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+#-Help: Call buildroot's makefile
+#-Use: [<buildroot_target>]
+#-Extended: Use the target "nconfig" to configure buildroot
+
+set -euo pipefail
+
+pushd "${KSB_BUILDROOT_DIR}"
+make BR2_EXTERNAL="${KSB_BUILDROOT_EXTERNAL_TREE}" "$@"
+popd
+
+#if [ "${KSB_BUILDROOT_IMAGES_DIR}/hudOS.img" -nt "${HB_OUTPUT_DIR}/hudOS.img" ]; then
+#    mkdir -p "${HB_OUTPUT_DIR}"
+#    cp "${HB_BUILDROOT_IMAGES_DIR}/hudOS.img" "${HB_OUTPUT_DIR}/hudOS.img"
+#fi

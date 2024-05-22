@@ -7,7 +7,11 @@ source "${KSB_SCRIPTS_LIB_DIR}/logging.sh"
 
 firmware_src_dir="${KSB_PROJECT_ROOT}/keystation-firmware"
 
+# TODO: Detect serial
 arduino_serial="/dev/ttyUSB0"
+
+# TODO: Install ravedude with ksb-cargo
+# TODO: Support just flashing (use avrdude directly)
 
 source ksb-toolchain avr
 

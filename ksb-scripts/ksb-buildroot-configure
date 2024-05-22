@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+#-NoHelp: Internal
+
+set -euo pipefail
+source "${KSB_SCRIPTS_LIB_DIR}/logging.sh"
+
+# Has buildroot been setup?
+if [ ! -f "${KSB_BUILDROOT_DIR}/.stamp" ]; then
+    if [ ! -d "${KSB_BUILDROOT_DIR}" ]; then
+        # Force vendor to download dependencies
+        rm -f "${KSB_VENDOR_DIR}/.stamp"
+        # If the directory doesn't exist, we need to download buildroot
+        ksb-vendor
+    fi
+
+    # Apply our custom defconfig
+    # At somepoint we'll need to support multiple defconfigs
+    ksb-buildroot-build "$(basename "${KSB_BUILDROOT_GIT_CONFIG}")"
+fi
+touch "${KSB_BUILDROOT_DIR}/.stamp"

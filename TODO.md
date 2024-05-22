@@ -1,6 +1,5 @@
 # TODO
 - build system (port of hudOS build system)
-  - support buildroot (pi image comes later)
   - update buildroot version
 - keybed firmware
     - increase velocity measurement accuracy

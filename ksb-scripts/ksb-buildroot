@@ -1,0 +1,49 @@
+#!/usr/bin/env bash
+#-Help: Wraps buildroot to include custom packages
+
+set -euo pipefail
+source "${KSB_SCRIPTS_LIB_DIR}/logging.sh"
+
+# TODO: Don't run buildroot in place?
+# TODO: Condense into one file
+
+export KSB_BUILDROOT_DIR="${KSB_VENDOR_DIR}/buildroot"
+export KSB_BUILDROOT_CONFIG="${KSB_BUILDROOT_DIR}/.config"
+export KSB_BUILDROOT_EXTERNAL_TREE="${KSB_PROJECT_ROOT}/buildroot"
+export KSB_BUILDROOT_GIT_CONFIG="${KSB_BUILDROOT_EXTERNAL_TREE}/configs/keystation_defconfig"
+export KSB_BUILDROOT_BUILD_DIR="${KSB_BUILDROOT_DIR}/output/build"
+export KSB_BUILDROOT_IMAGES_DIR="${KSB_BUILDROOT_DIR}/output/images"
+export KSB_BUILDROOT_TARGET_DIR="${KSB_BUILDROOT_DIR}/output/target"
+
+# Setup buildroot cache
+ksb_buildroot_cache_dir="${KSB_CACHE_DIR}/buildroot"
+export BR2_DL_DIR="${ksb_buildroot_cache_dir}/dl"
+export BR2_CCACHE_DIR="${ksb_buildroot_cache_dir}/ccache"
+
+cmd="${1:-}"
+if [[ "${cmd}" == "" ]]; then
+    log_warning "No command given"
+    exit 0
+fi
+
+ksb-buildroot-configure
+
+if [ "${KSB_BUILDROOT_GIT_CONFIG}" -nt "${KSB_BUILDROOT_CONFIG}" ]; then
+    log_warning "Defconfig has been updated by git!"
+    log_fatal "Either reset buildroot (erasing any changes), or merge your changes into the new config"
+fi
+
+buildroot_command="ksb-buildroot-$cmd"
+if ! which "${buildroot_command}" > /dev/null; then
+    log_fatal "Unknown command $cmd"
+fi
+
+"${buildroot_command}" "${@:2}"
+
+if [ "${KSB_BUILDROOT_CONFIG}" -nt "${KSB_BUILDROOT_GIT_CONFIG}" ]; then
+    read -p "Do you want to save buildroot config to git? [y/N]: " -n 1 -r
+    echo
+    if [[ $REPLY =~ ^[Yy]$ ]]; then
+        ksb-buildroot-save
+    fi
+fi
