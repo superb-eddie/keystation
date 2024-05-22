@@ -1,0 +1,31 @@
+#!/usr/bin/env bash
+#-Help: Build/run/flash arduino firmware
+#-Use: (build|run|flash)
+
+set -euo pipefail
+source "${KSB_SCRIPTS_LIB_DIR}/logging.sh"
+
+firmware_src_dir="${KSB_PROJECT_ROOT}/keystation-firmware"
+
+arduino_serial="/dev/ttyUSB0"
+
+source ksb-toolchain avr
+
+pushd "${firmware_src_dir}"
+case "${1}" in
+  "build")
+    ksb-cargo build "${@:2}"
+  ;;
+  "run")
+    export CARGO_TARGET_AVR_ATMEGA328P_RUNNER="ravedude nano-new -cb 57600 -P ${arduino_serial}"
+    ksb-cargo run "${@:2}"
+  ;;
+  "flash")
+    log_fatal "please run"
+  ;;
+  *)
+    log_fatal "unknown command ${1}"
+  ;;
+esac
+popd
+

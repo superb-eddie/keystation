@@ -1,0 +1,31 @@
+# TODO
+- build system (port of hudOS build system)
+  - support buildroot (pi image comes later)
+  - update buildroot version
+- keybed firmware
+    - increase velocity measurement accuracy
+    - send keystrokes + velocity out the serial port
+- requires pi 4
+    - configure base buildroot image for pi 
+        - question: full custom userspace or no?
+        - maybe no systemd this time. Keep the image tiny
+        - readonly rootfs
+    - build vcvrack or cardinal in 
+    - test macos m1 vcv rack plugins (newer pi == hopefully closer instruction sets)
+        - if they don't work, get a set of plugins to be bundled
+    - get usb-hid working
+        - https://forums.raspberrypi.com/viewtopic.php?t=341244
+    - get OLED working
+        - https://www.adafruit.com/product/3531
+    - expose block storage over usb when in "instrument" mode to upload patches
+    - expose midi when in "midi" mode
+    - Maybe also expose a "flashing" mode?
+    - OLED screen should be able to switch between internal synth and midi
+    - Do we have enough I/O to connect volume/pitch and buttons to the pi?
+    - pi should check which firmware the arduino is running, and flash the current version if needed
+- Janko conversion
+    - replicate key mechanism in cad
+    - build janko keys on top
+    - 3d print
+- Stretch goals
+  - Build a custom board for CM4+arduino?

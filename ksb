@@ -40,30 +40,3 @@ mkdir -p "${KSB_WORK_DIR}"
 
     "${ksb_command}" "${@:2}"
 } 9>"${KSB_WORK_DIR}/.ksb_lock"
-
-
-#function ksb() {
-#  target="${1}"
-#
-#  case "${target}" in
-#    toolchains)
-#      "${KSB_PROJECT_ROOT}/ksb-toolchains.sh" "${@:2}"
-#    ;;
-#    firmware)
-#      if [[ "${2}" != "clean" ]]; then
-#        ksb toolchains
-#        . "${KSB_PROJECT_ROOT}/.toolchains/use-avr.sh"
-#      fi
-#
-#      pushd "${KSB_PROJECT_ROOT}/keystation-firmware/"
-#      cargo "${@:2}"
-#      popd
-#    ;;
-#    clean)
-#      ksb toolchains --clean
-#      ksb firmware clean
-#    ;;
-#  esac
-#}
-#
-#ksb "${@:1}"

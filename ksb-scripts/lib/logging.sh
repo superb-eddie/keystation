@@ -21,7 +21,7 @@ function log() {
 }
 
 function log_section() {
-	log "${ANSI_BLUE}$@${ANSI_RESET}"
+	log "\033]0;$@\007${ANSI_BLUE}$@${ANSI_RESET}"
 }
 
 function log_subsection() {

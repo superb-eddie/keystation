@@ -1,0 +1,74 @@
+#!/usr/bin/env bash
+#-Help: Build toolchain with crosstool and prepare shell to use it
+#-Use: <toolchain_name>
+
+set -euo pipefail
+source "${KSB_SCRIPTS_LIB_DIR}/logging.sh"
+
+crosstool_install_dir="${KSB_WORK_DIR}/crosstool-ng"
+crosstool_build_dir="${KSB_BUILD_DIR}/crosstool-ng"
+crosstool_toolchains_dir="${KSB_WORK_DIR}/toolchains"
+
+if [[ ! -d "${crosstool_install_dir}" ]] || [[ ! -d "${crosstool_build_dir}" ]]; then
+  rm -rf "${crosstool_install_dir}"
+  rm -rf "${crosstool_build_dir}"
+  if [[ -d "${crosstool_toolchains_dir}" ]]; then
+    chmod -R +w "${crosstool_toolchains_dir}"
+    rm -rf "${crosstool_toolchains_dir}"
+  fi
+
+  ksb-vendor
+  crosstool_source_dir="${KSB_VENDOR_DIR}/crosstool-ng"
+
+  log_section "Installing crosstool-ng"
+  pushd "${crosstool_source_dir}"
+
+  ./bootstrap
+
+  popd
+
+  mkdir -p "${crosstool_build_dir}"
+  pushd "${crosstool_build_dir}"
+
+  "${crosstool_source_dir}/configure" --srcdir="${crosstool_source_dir}" --prefix="${crosstool_install_dir}"
+  make
+  make install
+
+  popd
+
+fi
+
+# Cross tool should be installed and usable now
+toolchain_name="${1}"
+toolchain_install_dir="${crosstool_toolchains_dir}/${toolchain_name}"
+toolchain_build_dir="${KSB_BUILD_DIR}/${toolchain_name}"
+
+if [[ ! -d "${toolchain_install_dir}" ]] || [[ ! -d "${toolchain_build_dir}" ]]; then
+  rm -rf "${toolchain_build_dir}"
+  if [[ -d "${toolchain_install_dir}" ]]; then
+    chmod -R +w "${toolchain_install_dir}"
+    rm -rf "${toolchain_install_dir}"
+  fi
+
+#  crosstool_cache_dir="${KSB_CACHE_DIR}/crosstool"
+#  mkdir -p "${crosstool_cache_dir}"
+
+  log_section "Installing ${toolchain_name}"
+  mkdir -p "${toolchain_build_dir}"
+  pushd "${toolchain_build_dir}"
+
+  # Run in a subshell to not pollute environment (this script will be sourced)
+  {
+    export CT_PREFIX="${crosstool_toolchains_dir}"
+#    export CT_LOCAL_TARBALLS_DIR="${crosstool_cache_dir}" TODO
+    export PATH="${crosstool_install_dir}/bin:${PATH}"
+    ct-ng "${toolchain_name}"
+    ct-ng build
+  }
+
+  popd
+fi
+
+# Setup shell with toolchain
+# TODO: More variables to locate new toolchain
+export PATH="${toolchain_install_dir}/bin:${PATH}"

@@ -2,7 +2,6 @@
 .idea/
 
 /**/target/
-/.toolchains/
 /.ksb/
 
 # Contains hardware references. A lot of pictures and other binary files

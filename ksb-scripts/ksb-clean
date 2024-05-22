@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+#-Help: Remove all built artifacts
+
+crosstool_toolchains_dir="${KSB_WORK_DIR}/toolchains"
+if [[ -d "${crosstool_toolchains_dir}" ]]; then
+  chmod -R +w "${crosstool_toolchains_dir}"
+  rm -rf "${crosstool_toolchains_dir}"
+fi
+
+rm -rf "${KSB_WORK_DIR}/crosstool-ng"
+rm -rf "${KSB_WORK_DIR}/build"

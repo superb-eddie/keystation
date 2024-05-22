@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 #-Help: Download and patch vendored dependencies
+
+set -euo pipefail
 source "${KSB_SCRIPTS_LIB_DIR}/logging.sh"
 source "${KSB_SCRIPTS_LIB_DIR}/json.sh"
 source "${KSB_SCRIPTS_LIB_DIR}/vendor/git.sh"

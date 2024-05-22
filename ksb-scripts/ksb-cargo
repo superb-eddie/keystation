@@ -1,0 +1,28 @@
+#!/usr/bin/env bash
+#-Help: Pass through to cargo
+
+set -euo pipefail
+source "${KSB_SCRIPTS_LIB_DIR}/logging.sh"
+
+ksb_cargo_home="${KSB_WORK_DIR}/cargo"
+
+export RUSTUP_HOME="${ksb_cargo_home}"
+export CARGO_HOME="${ksb_cargo_home}"
+export CARGO_TARGET_DIR="${KSB_BUILD_DIR}/cargo-target"
+
+if [[ ! -d "${ksb_cargo_home}" ]]; then
+  log_section "Installing cargo"
+
+  mkdir -p "${ksb_cargo_home}"
+  ksb-vendor
+  "${KSB_VENDOR_DIR}/rustup/rustup-init.sh" -y \
+    --no-update-default-toolchain \
+    --no-modify-path \
+    --component rust-src \
+    --profile minimal \
+    --default-toolchain nightly-2024-03-22
+fi
+
+mkdir -p "${CARGO_TARGET_DIR}"
+source "${ksb_cargo_home}/env"
+cargo "${@:1}"
