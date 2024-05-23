@@ -6,10 +6,19 @@
 set -euo pipefail
 
 pushd "${KSB_BUILDROOT_DIR}"
-make BR2_EXTERNAL="${KSB_BUILDROOT_EXTERNAL_TREE}" "$@"
+mkdir -p "${KSB_BUILDROOT_OUTPUT_DIR}"
+make BR2_EXTERNAL="${KSB_BUILDROOT_EXTERNAL_TREE}" O="${KSB_BUILDROOT_OUTPUT_DIR}" "$@"
 popd
 
-#if [ "${KSB_BUILDROOT_IMAGES_DIR}/hudOS.img" -nt "${HB_OUTPUT_DIR}/hudOS.img" ]; then
-#    mkdir -p "${HB_OUTPUT_DIR}"
-#    cp "${HB_BUILDROOT_IMAGES_DIR}/hudOS.img" "${HB_OUTPUT_DIR}/hudOS.img"
-#fi
+image_name="sdcard.img"
+new_image="${KSB_BUILDROOT_IMAGES_DIR}/${image_name}"
+old_image="${KSB_IMAGES_DIR}/${image_name}"
+
+echo "${new_image}"
+echo "${old_image}"
+
+if [[ "${new_image}" -nt "${old_image}" ]] \
+|| { [[ -f "${new_image}" ]] && [[ ! -f "${old_image}" ]]; }; then
+    mkdir -p "${KSB_IMAGES_DIR}"
+    cp "${new_image}" "${old_image}"
+fi

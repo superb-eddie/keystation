@@ -10,6 +10,7 @@ export KSB_WORK_DIR="${KSB_PROJECT_ROOT}/.ksb"
 export KSB_BUILD_DIR="${KSB_WORK_DIR}/build"
 export KSB_CACHE_DIR="${KSB_WORK_DIR}/cache"
 export KSB_VENDOR_DIR="${KSB_WORK_DIR}/vendor"
+export KSB_IMAGES_DIR="${KSB_WORK_DIR}/images"
 
 export PATH="${KSB_SCRIPTS_DIR}:${PATH}"
 

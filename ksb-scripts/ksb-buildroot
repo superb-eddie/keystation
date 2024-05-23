@@ -4,21 +4,22 @@
 set -euo pipefail
 source "${KSB_SCRIPTS_LIB_DIR}/logging.sh"
 
-# TODO: Don't run buildroot in place?
 # TODO: Condense into one file
 
 export KSB_BUILDROOT_DIR="${KSB_VENDOR_DIR}/buildroot"
-export KSB_BUILDROOT_CONFIG="${KSB_BUILDROOT_DIR}/.config"
 export KSB_BUILDROOT_EXTERNAL_TREE="${KSB_PROJECT_ROOT}/buildroot"
 export KSB_BUILDROOT_GIT_CONFIG="${KSB_BUILDROOT_EXTERNAL_TREE}/configs/keystation_defconfig"
-export KSB_BUILDROOT_BUILD_DIR="${KSB_BUILDROOT_DIR}/output/build"
-export KSB_BUILDROOT_IMAGES_DIR="${KSB_BUILDROOT_DIR}/output/images"
-export KSB_BUILDROOT_TARGET_DIR="${KSB_BUILDROOT_DIR}/output/target"
+export KSB_BUILDROOT_OUTPUT_DIR="${KSB_BUILD_DIR}/buildroot"
+export KSB_BUILDROOT_CONFIG="${KSB_BUILDROOT_OUTPUT_DIR}/.config"
+export KSB_BUILDROOT_BUILD_DIR="${KSB_BUILDROOT_OUTPUT_DIR}/build"
+export KSB_BUILDROOT_IMAGES_DIR="${KSB_BUILDROOT_OUTPUT_DIR}/images"
+export KSB_BUILDROOT_TARGET_DIR="${KSB_BUILDROOT_OUTPUT_DIR}/target"
 
 # Setup buildroot cache
 ksb_buildroot_cache_dir="${KSB_CACHE_DIR}/buildroot"
 export BR2_DL_DIR="${ksb_buildroot_cache_dir}/dl"
 export BR2_CCACHE_DIR="${ksb_buildroot_cache_dir}/ccache"
+export BR2_USE_CCACHE=1
 
 cmd="${1:-}"
 if [[ "${cmd}" == "" ]]; then

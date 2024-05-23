@@ -1,6 +1,5 @@
 # TODO
-- build system (port of hudOS build system)
-  - update buildroot version
+- bring rustup installer into source, maybe vendor rust?
 - keybed firmware
     - increase velocity measurement accuracy
     - send keystrokes + velocity out the serial port
