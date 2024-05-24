@@ -1,0 +1,5 @@
+config BR2_PACKAGE_CARDINAL
+	bool "cardinal"
+	select BR2_PACKAGE_LIBLO
+	help
+	    Virtual modular synthesizer plugin

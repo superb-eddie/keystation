@@ -1,0 +1,37 @@
+--- a/arch.mk
++++ b/arch.mk
+@@ -3,6 +3,7 @@
+ else
+ 	MACHINE ?= $(shell $(CC) -dumpmachine)
+ endif
++HOST_MACHINE := $(shell $(HOSTCC) -dumpmachine)
+
+ ifneq (,$(findstring x86_64-,$(MACHINE)))
+ 	ARCH_X64 := 1
+--
+
+--- a/dep.mk
++++ b/dep.mk
+@@ -38,6 +38,9 @@
+ UNTAR := tar xf
+ UNZIP := unzip -o
+ CONFIGURE := ./configure --prefix="$(DEP_PATH)"
++ifdef CROSS_COMPILE
++	CONFIGURE += --host=$(HOST_MACHINE)
++endif
+
+ CMAKE := cmake
+ ifdef ARCH_WIN
+--
+
+--- a/dep/Makefile
++++ b/dep/Makefile
+@@ -124,7 +124,7 @@
+ $(openssl): | openssl-1.1.1k
+ 	# The CFLAGS environment variable is ignored, so pass CFLAGS to their custom ./config script, which passes them to the compiler.
+ 	# Set no-pinshared so OpenSSL doesn't call GetModuleHandleEx(GET_MODULE_HANDLE_EX_FLAG_PIN, ...) on initialization on Windows. This prevents libRack from being unloaded on Windows with FreeLibrary().
+-	cd openssl-1.1.1k && ./config --prefix="$(DEP_PATH)" no-shared no-hw threads no-zlib no-capieng no-pinshared $(CFLAGS)
++	cd openssl-1.1.1k && MACHINE=$(MACHINE) ./config --prefix="$(DEP_PATH)" no-shared no-hw threads no-zlib no-capieng no-pinshared $(CFLAGS)
+ 	$(MAKE) -C openssl-1.1.1k
+ 	$(MAKE) -C openssl-1.1.1k install_sw
+--
