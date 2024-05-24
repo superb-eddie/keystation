@@ -1,0 +1,4 @@
+config BR2_PACKAGE_BUILTIN_PATCHES
+	bool "builtin-patches"
+	help
+	    Builtin patches for Cardinal
