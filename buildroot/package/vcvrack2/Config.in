@@ -1,9 +1,0 @@
-config BR2_PACKAGE_VCVRACK2
-	bool "vcvrack2"
-	select BR2_PACKAGE_LIBGLFW
-	depends on BR2_PACKAGE_HAS_LIBGL
-	help
-	    The virtual Eurorack studio
-
-comment "vcvrack needs libgl"
-    depends on !BR2_PACKAGE_HAS_LIBGL
