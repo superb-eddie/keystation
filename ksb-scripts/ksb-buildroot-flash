@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+#-NoHelp: Internal
+
+set -euo pipefail
+source "${KSB_SCRIPTS_LIB_DIR}/logging.sh"
+
+ksb_image="${KSB_IMAGES_DIR}/sdcard.img"
+ksb_device="/dev/sda"
+
+read -p "Do you want to write ${ksb_image} to ${ksb_device}? [y/N]: " -n 1 -r
+echo
+if [[ $REPLY =~ ^[Yy]$ ]]; then
+    pv "${ksb_image}" | sudo dd of="${ksb_device}" bs=1024
+
+    log "Done. Ejecting ${ksb_device}"
+    sudo eject ${ksb_device}
+fi

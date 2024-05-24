@@ -26,6 +26,7 @@ Any linux system should work, install dependencies for:
 Also install:
 - avrdude
 - jq
+- pv
 
 ### Debian
 ```

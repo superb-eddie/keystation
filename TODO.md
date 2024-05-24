@@ -5,8 +5,9 @@
   - send keystrokes + velocity out the serial port
 - synth host:
   - Load bcm audio module on boot
+  - systemd, or another init?
   - Cardinal doesn't support loading patches from cmdline
-  - Run cardinal as a daemon, load patches with OSC client?
+    - Run cardinal as a daemon, load patches with OSC client?
   - get usb-hid working
     - https://forums.raspberrypi.com/viewtopic.php?t=341244
   - get OLED working
