@@ -22,5 +22,14 @@
   - replicate key mechanism in cad
   - build janko keys on top
   - 3d print
+- Hardware mounting
+  - Measure existing holes
+  - Which ports to expose?
+    - Maybe ethernet? Could expose OSC
+    - usb for power/data
+      - Can we power pi+arduino from usb power when connected to a computer?
+    - audio out
+      - With a decent dac, maybe export in+out to work as effects host?
+    - power switch?
 - Stretch goals
   - Build a custom board for CM4+arduino?
