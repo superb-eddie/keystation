@@ -16,6 +16,7 @@ elif [ -d ${TARGET_DIR}/etc/systemd ]; then
 fi
 
 # Add modules to modprobe
+# TODO: /etc/modules doesnt' work
 cat << EOF > "${TARGET_DIR}/etc/modules"
 snd-bcm2835
 EOF
