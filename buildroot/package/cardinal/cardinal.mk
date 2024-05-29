@@ -12,7 +12,8 @@ define CARDINAL_BUILD_CMDS
 endef
 
 define CARDINAL_INSTALL_TARGET_CMDS
-	$(MAKE) $(TARGET_CONFIGURE_OPTS) CROSS_COMPILING=true HEADLESS=true DESTDIR=$(TARGET_DIR)  -C $(@D) install
+	$(MAKE) $(TARGET_CONFIGURE_OPTS) CROSS_COMPILING=true HEADLESS=true DESTDIR=$(TARGET_DIR)  -C $(@D) install; \
+	$(INSTALL) -D -m 755 $(CARDINAL_PKGDIR)/S99cardinal $(TARGET_DIR)/etc/init.d/S99cardinal
 endef
 
 $(eval $(generic-package))

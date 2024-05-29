@@ -1,0 +1,46 @@
+#!/bin/sh
+# see about BusyBox init https://www.halolinux.us/embedded-systems/busybox-init.html
+
+cardinal_bin="CardinalNative"
+cardinal_path="/usr/local/bin/${cardinal_bin}"
+cardinal_log="/var/log/cardinal.log"
+
+# Make sure the application exists
+[ -f "${cardinal_path}" ] || exit 0
+
+umask 077
+
+log() {
+	echo "$1" | tee /dev/kmsg >> "${cardinal_log}"
+}
+
+start() {
+    "${cardinal_path}" >> "${cardinal_log}" 2>&1 &
+}
+stop() {
+    killall -q "${cardinal_bin}"
+}
+restart() {
+    stop
+    start
+}
+
+case "$1" in
+  start)
+    log "starting Cardinal"
+    start
+    ;;
+  stop)
+    log "stopping Cardinal"
+    stop
+    ;;
+  restart|reload)
+    log "restarting Cardinal"
+    restart
+    ;;
+  *)
+    echo "Usage: $0 {start|stop|restart}"
+    exit 1
+esac
+
+exit $?

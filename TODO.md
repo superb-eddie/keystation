@@ -4,8 +4,7 @@
   - increase velocity measurement accuracy
   - send keystrokes + velocity out the serial port
 - synth host:
-  - Load bcm audio module on boot
-  - systemd, or another init?
+  - Cardinal can't connect to headphone jack output?
   - Cardinal doesn't support loading patches from cmdline
     - Run cardinal as a daemon, load patches with OSC client?
   - get usb-hid working
