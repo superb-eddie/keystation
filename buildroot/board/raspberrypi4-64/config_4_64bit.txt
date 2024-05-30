@@ -9,3 +9,4 @@ dtoverlay=disable-wifi
 dtoverlay=disable-bt
 dtoverlay=vc4-kms-v3d-pi4
 dtoverlay=imx219
+dtoverlay=dwc2

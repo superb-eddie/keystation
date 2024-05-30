@@ -1,0 +1,5 @@
+config BR2_PACKAGE_MIDI_GADGET
+	bool "midi-gadget"
+	select loadmodules
+	help
+	    Setup linux to act as usb midi client

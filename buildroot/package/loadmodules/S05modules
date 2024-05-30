@@ -1,0 +1,49 @@
+#!/bin/sh
+
+klog() {
+  echo "$1" | tee /dev/kmsg
+}
+
+load_modules_file() {
+  modules_file="${1}"
+
+  if [ ! -f "${modules_file}" ]; then
+    return 0
+  fi
+
+  while IFS= read -r modargs; do
+    if [ "${modargs}x" = "x" ]; then
+      continue
+    fi
+
+     klog "Loading ${modargs}"
+     if ! modprobe ${modargs}; then
+       klog "Could not load ${modargs}"
+     fi
+
+  done < "${modules_file}"
+}
+
+load_modules() {
+  load_modules_file "/etc/modules"
+
+  if [ ! -d "/etc/modules.d" ]; then
+    exit 0
+  fi
+
+  for mod_file in /etc/modules.d/*; do
+    load_modules_file "${mod_file}"
+  done
+}
+
+
+case "$1" in
+  start|stop|restart|reload)
+    load_modules
+	;;
+  *)
+    echo "Usage: $0 {start|stop|restart|reload}"
+	exit 1
+esac
+
+exit $?

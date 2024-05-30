@@ -4,6 +4,7 @@
   - increase velocity measurement accuracy
   - send keystrokes + velocity out the serial port
 - synth host:
+  - independent power source
   - Cardinal doesn't support loading patches from cmdline
   - get usb-hid working
     - https://forums.raspberrypi.com/viewtopic.php?t=341244
