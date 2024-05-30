@@ -1,8 +1,8 @@
 config BR2_PACKAGE_KEYSTATION
 	bool "keystation"
 	select BR2_PACKAGE_LOADMODULES
-	select BR2_PACKAGE_CARDINAL
-	select BR2_PACKAGE_BUILTIN_PATCHES
 	select BR2_PACKAGE_JACKD
+	select BR2_PACKAGE_CARDINAL
+	select BR2_PACKAGE_PATCH_LOADER
 	help
 	    Meta package for the keystation os

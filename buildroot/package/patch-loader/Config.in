@@ -1,0 +1,9 @@
+config BR2_PACKAGE_PATCH_LOADER
+	bool "patch-loader"
+    depends on BR2_PACKAGE_HOST_RUSTC_TARGET_ARCH_SUPPORTS
+    select BR2_PACKAGE_HOST_RUSTC
+	help
+	    Tool for loading synth patch files
+
+comment "patch-loader needs rustc with target arch support"
+    depends on !BR2_PACKAGE_HOST_RUSTC_TARGET_ARCH_SUPPORTS
