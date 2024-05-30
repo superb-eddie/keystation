@@ -1,11 +1,9 @@
 #!/bin/sh
-# see about BusyBox init https://www.halolinux.us/embedded-systems/busybox-init.html
 
-cardinal_bin="CardinalNative"
+cardinal_bin="Cardinal"
 cardinal_path="/usr/local/bin/${cardinal_bin}"
-cardinal_log="/var/log/cardinal.log"
+cardinal_log="/var/log/${cardinal_bin}.log"
 
-# Make sure the application exists
 [ -f "${cardinal_path}" ] || exit 0
 
 umask 077
@@ -15,6 +13,7 @@ log() {
 }
 
 start() {
+# TODO: Try starting with $JACK_START_SERVER defined
     "${cardinal_path}" >> "${cardinal_log}" 2>&1 &
 }
 stop() {
@@ -27,15 +26,15 @@ restart() {
 
 case "$1" in
   start)
-    log "starting Cardinal"
+    log "starting ${cardinal_bin}"
     start
     ;;
   stop)
-    log "stopping Cardinal"
+    log "stopping ${cardinal_bin}"
     stop
     ;;
   restart|reload)
-    log "restarting Cardinal"
+    log "restarting ${cardinal_bin}"
     restart
     ;;
   *)

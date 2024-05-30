@@ -1,0 +1,44 @@
+#!/bin/sh
+
+jackd_bin="jackd"
+jackd_path="/usr/bin/${jackd_bin}"
+jackd_log="/var/log/${jackd_bin}.log"
+
+[ -x "${jackd_path}" ] || exit 0
+
+umask 077
+
+log() {
+	echo "$1" | tee /dev/kmsg >> "${jackd_log}"
+}
+
+start() {
+    "${jackd_path}" -d alsa >> "${jackd_log}" 2>&1 &
+}
+stop() {
+    killall -q "${jackd_bin}"
+}
+restart() {
+    stop
+    start
+}
+
+case "$1" in
+  start)
+    log "starting ${jackd_bin}"
+    start
+    ;;
+  stop)
+    log "stopping ${jackd_bin}"
+    stop
+    ;;
+  restart|reload)
+    log "restarting ${jackd_bin}"
+    restart
+    ;;
+  *)
+    echo "Usage: $0 {start|stop|restart}"
+    exit 1
+esac
+
+exit $?

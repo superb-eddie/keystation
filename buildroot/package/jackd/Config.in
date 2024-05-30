@@ -1,0 +1,5 @@
+config BR2_PACKAGE_JACKD
+	bool "jackd"
+	depends on BR2_PACKAGE_JACK2
+	help
+	    Init scripts for jackd

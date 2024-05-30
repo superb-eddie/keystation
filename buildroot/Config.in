@@ -1,3 +1,6 @@
 source "$BR2_EXTERNAL_KBS_PATH/package/loadmodules/Config.in"
 source "$BR2_EXTERNAL_KBS_PATH/package/cardinal/Config.in"
 source "$BR2_EXTERNAL_KBS_PATH/package/builtin-patches/Config.in"
+source "$BR2_EXTERNAL_KBS_PATH/package/jackd/Config.in"
+
+source "$BR2_EXTERNAL_KBS_PATH/package/keystation/Config.in"
