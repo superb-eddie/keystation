@@ -23,7 +23,8 @@ endef
 
 define MIDI_GADGET_INSTALL_TARGET_CMDS
 	echo "dwc2" > $(TARGET_DIR)/etc/modules.d/05midi; \
-	echo "g-midi" >> $(TARGET_DIR)/etc/modules.d/05midi
+	echo "g-midi" >> $(TARGET_DIR)/etc/modules.d/05midi; \
+	echo "snd-seq-midi" >> $(TARGET_DIR)/etc/modules.d/05midi
 endef
 
 $(eval $(generic-package))

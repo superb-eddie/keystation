@@ -5,11 +5,9 @@
   - send keystrokes + velocity out the serial port
 - synth host:
   - independent power source
-  - Cardinal doesn't support loading patches from cmdline
-  - get usb-hid working
-    - https://forums.raspberrypi.com/viewtopic.php?t=341244
   - get OLED working
     - https://www.adafruit.com/product/3531
+  - serial port gadget for debugging?
   - expose block storage over usb when in "instrument" mode to upload patches
   - expose midi when in "midi" mode
   - Maybe also expose a "flashing" mode?

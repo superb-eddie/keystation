@@ -3,5 +3,6 @@ source "$BR2_EXTERNAL_KBS_PATH/package/cardinal/Config.in"
 source "$BR2_EXTERNAL_KBS_PATH/package/jackd/Config.in"
 source "$BR2_EXTERNAL_KBS_PATH/package/patch-loader/Config.in"
 source "$BR2_EXTERNAL_KBS_PATH/package/midi-gadget/Config.in"
+source "$BR2_EXTERNAL_KBS_PATH/package/midi-tools/Config.in"
 
 source "$BR2_EXTERNAL_KBS_PATH/package/keystation/Config.in"
