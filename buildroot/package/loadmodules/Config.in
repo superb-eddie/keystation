@@ -1,4 +1,4 @@
 config BR2_PACKAGE_LOADMODULES
 	bool "loadmodules"
 	help
-	    Load kernel modules
+	    Load etc/modules at boot

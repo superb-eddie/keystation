@@ -1,0 +1,5 @@
+config BR2_PACKAGE_SERIAL_GADGET
+	bool "serial-gadget"
+	select loadmodules
+	help
+	    Provide a serial console over USB

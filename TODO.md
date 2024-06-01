@@ -4,6 +4,8 @@
   - increase velocity measurement accuracy
   - send keystrokes + velocity out the serial port
 - synth host:
+  - USB serial gadget
+    - update rootfs over serial? 
   - independent power source
   - get OLED working
     - https://www.adafruit.com/product/3531

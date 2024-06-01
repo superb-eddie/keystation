@@ -2,28 +2,17 @@ MIDI_GADGET_VERSION = 0.0.1
 MIDI_GADGET_SITE = $(BR2_EXTERNAL_KBS_PATH)/package/midi-gadget
 MIDI_GADGET_SITE_METHOD = local
 MIDI_GADGET_INSTALL_TARGET = YES
-
-# Kernel fixups + modules
-# USB_MIDI_GADGET = y
-# USB_GADGET = Y
-# USB_CONFIGFS = y
-# USB_CONFIGFS_F_MIDI = y
-# SND_SEQ_MIDI = y
-# SND_SEQUENCER = y
-#https://linux-sunxi.org/USB_Gadget/MIDI
+MIDI_GADGET_DEPENDENCIES = keystation loadmodules
 
 define MIDI_GADGET_LINUX_CONFIG_FIXUPS
 	$(call KCONFIG_ENABLE_OPT,CONFIG_USB_MIDI_GADGET)
-	$(call KCONFIG_ENABLE_OPT,CONFIG_USB_GADGET)
-	$(call KCONFIG_ENABLE_OPT,CONFIG_USB_CONFIGFS)
 	$(call KCONFIG_ENABLE_OPT,CONFIG_USB_CONFIGFS_F_MIDI)
 	$(call KCONFIG_ENABLE_OPT,CONFIG_SND_SEQ_MIDI)
 	$(call KCONFIG_ENABLE_OPT,CONFIG_SND_SEQUENCER)
 endef
 
 define MIDI_GADGET_INSTALL_TARGET_CMDS
-	echo "dwc2" > $(TARGET_DIR)/etc/modules.d/05midi; \
-	echo "g-midi" >> $(TARGET_DIR)/etc/modules.d/05midi; \
+	echo "g-midi" > $(TARGET_DIR)/etc/modules.d/05midi; \
 	echo "snd-seq-midi" >> $(TARGET_DIR)/etc/modules.d/05midi
 endef
 

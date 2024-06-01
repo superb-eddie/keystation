@@ -38,8 +38,11 @@ load_modules() {
 
 
 case "$1" in
-  start|stop|restart|reload)
+  start|restart|reload)
     load_modules
+	;;
+	stop)
+	  echo "Bye bye! :3"
 	;;
   *)
     echo "Usage: $0 {start|stop|restart|reload}"
