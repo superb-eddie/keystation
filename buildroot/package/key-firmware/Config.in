@@ -1,0 +1,4 @@
+config BR2_PACKAGE_KEY_FIRMWARE
+	bool "key-firmware"
+	help
+	    Firmware binaries for key-driver

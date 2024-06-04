@@ -1,0 +1,10 @@
+config BR2_PACKAGE_KEY_DRIVER
+	bool "key-driver"
+    depends on BR2_PACKAGE_HOST_RUSTC_TARGET_ARCH_SUPPORTS
+    select BR2_PACKAGE_HOST_RUSTC
+    select BR2_PACKAGE_KEY_FIRMWARE
+	help
+	    Userspace driver for the keyboard
+
+comment "key-driver needs rustc with target arch support"
+    depends on !BR2_PACKAGE_HOST_RUSTC_TARGET_ARCH_SUPPORTS

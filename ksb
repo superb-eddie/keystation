@@ -4,6 +4,7 @@ set -euo pipefail
 # KSB: Key station builder
 
 export KSB_PROJECT_ROOT="$(dirname "$(realpath "$0")")"
+export KSB="${KSB_PROJECT_ROOT}/ksb"
 export KSB_SCRIPTS_DIR="${KSB_PROJECT_ROOT}/ksb-scripts"
 export KSB_SCRIPTS_LIB_DIR="${KSB_SCRIPTS_DIR}/lib"
 export KSB_WORK_DIR="${KSB_PROJECT_ROOT}/.ksb"
