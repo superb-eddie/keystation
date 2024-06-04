@@ -2,11 +2,15 @@
 name = "keystation-firmware"
 version = "0.1.0"
 edition = "2021"
+build = "build.rs"
 
 [[bin]]
 name = "keystation-firmware"
 test = false
 bench = false
+
+[build-dependencies]
+chrono = "0.4.19"
 
 [dependencies]
 ufmt = "0.2.0"

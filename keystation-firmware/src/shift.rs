@@ -1,23 +1,19 @@
-
-
 use arduino_hal::port::mode::Output;
-use arduino_hal::port::{Pin};
+use arduino_hal::port::Pin;
 
-pub struct ShiftRegister
-{
+pub struct ShiftRegister {
     enable: Pin<Output>,
     input: Pin<Output>,
-    clock: Pin<Output>
+    clock: Pin<Output>,
 }
 
-impl ShiftRegister
-{
-
+impl ShiftRegister {
     pub fn new(enable: Pin<Output>, input: Pin<Output>, clock: Pin<Output>) -> Self {
-
         return Self {
-            enable, input, clock
-        }
+            enable,
+            input,
+            clock,
+        };
     }
 
     pub fn enable(&mut self) {
