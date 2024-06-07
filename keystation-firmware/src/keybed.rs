@@ -115,11 +115,8 @@ impl Keybed {
                 // If contact b is up, the key should be up
                 Some(Key::Up)
             }
-            _ => {
-                None
-            }
-        }
-
+            _ => None,
+        };
     }
 
     pub fn scan(&mut self, mut key_update: impl FnMut(usize, Key)) {

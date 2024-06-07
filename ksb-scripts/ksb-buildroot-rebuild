@@ -8,5 +8,14 @@ set -euo pipefail
 image_name="sdcard.img"
 rm -f "${KSB_BUILDROOT_IMAGES_DIR}/${image_name}"
 
-ksb-buildroot-build "${1}-rebuild"
+if [[ "${1:-x}" != "x" ]]; then
+  # if the target is one of our packages and has a source dir, then we
+  #   should remove the build directory so the code gets moved again
+  if [[ -d "${KSB_PROJECT_ROOT}/buildroot/package/${1}/source" ]]; then
+    rm -rf "${KSB_BUILD_DIR}/buildroot/build/${1}-0.0.1"
+  fi
+
+  ksb-buildroot-build "${1}-rebuild"
+fi
+
 ksb-buildroot-build

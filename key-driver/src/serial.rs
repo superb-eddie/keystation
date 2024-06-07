@@ -1,11 +1,13 @@
-
 // No existing serial library supports polling without a timeout??
+// Original code stolen shamelessly from the second popular serial library (but better of the two) `serial2`
 
-use std::os::unix::fs::OpenOptionsExt;
-use std::os::unix::io::AsRawFd;
 use std::{fs, io};
 use std::io::Write;
+use std::os::unix::fs::OpenOptionsExt;
+use std::os::fd::AsRawFd;
 use std::path::Path;
+
+//  TODO: Replace some of the libc here with the nix crate (rusty wrapper around libc) 
 
 fn check(ret: i32) -> io::Result<i32> {
     if ret == -1 {
@@ -25,23 +27,25 @@ fn check_isize(ret: isize) -> io::Result<usize> {
 }
 
 fn poll(file: &fs::File, events: std::os::raw::c_short) -> io::Result<bool> {
-    unsafe {
-        let mut poll_fd = libc::pollfd {
-            fd: file.as_raw_fd(),
-            events,
-            revents: 0,
-        };
-        check(libc::poll(&mut poll_fd, 1, -1))?;
-        Ok(poll_fd.revents != 0)
-    }
+    let mut poll_fd = libc::pollfd {
+        fd: file.as_raw_fd(),
+        events,
+        revents: 0,
+    };
+    check(unsafe { libc::poll(&mut poll_fd, 1, -1) })?;
+    Ok(poll_fd.revents != 0)
 }
 
 fn set_termios(file: &mut fs::File, rate: u32) {
-
     // Get the current termios settings
-    let mut termios: libc::termios2 = unsafe{
+    let mut termios: libc::termios2 = unsafe {
         let mut termios = std::mem::zeroed();
-        check(libc::ioctl(file.as_raw_fd(), libc::TCGETS2 as _, &mut termios)).unwrap();
+        check(libc::ioctl(
+            file.as_raw_fd(),
+            libc::TCGETS2 as _,
+            &mut termios,
+        ))
+        .unwrap();
 
         // Make raw to disable any OS shenanigans
         libc::cfmakeraw(&mut termios as *mut _ as *mut libc::termios);
@@ -68,9 +72,8 @@ fn set_termios(file: &mut fs::File, rate: u32) {
     termios.c_ospeed = rate;
     termios.c_ispeed = rate;
 
-    unsafe {
-        check(libc::ioctl(file.as_raw_fd(), libc::TCSETSW2 as _, &termios)).expect("could not set baud rate");
-    }
+    check(unsafe { libc::ioctl(file.as_raw_fd(), libc::TCSETSW2 as _, &termios) })
+        .expect("could not set baud rate");
 }
 
 pub fn open_serial_device(device: impl AsRef<Path>, baud_rate: u32) -> fs::File {
@@ -84,23 +87,23 @@ pub fn open_serial_device(device: impl AsRef<Path>, baud_rate: u32) -> fs::File 
 
     set_termios(&mut file, baud_rate);
 
-    return file
+    return file;
 }
 
 pub struct SerialPort {
-    device: fs::File
+    device: fs::File,
 }
 
 impl SerialPort {
     pub fn open(device: impl AsRef<Path>, baud_rate: u32) -> Self {
         SerialPort {
-            device: open_serial_device(device, baud_rate)
+            device: open_serial_device(device, baud_rate),
         }
     }
 
     pub fn flush(&mut self) {
         self.device.flush().unwrap()
-    }   
+    }
 }
 
 impl io::Read for SerialPort {
@@ -108,19 +111,18 @@ impl io::Read for SerialPort {
         if !poll(&self.device, libc::POLLIN)? {
             return Err(io::ErrorKind::TimedOut.into());
         }
-        unsafe {
-            loop {
-                let result = check_isize(libc::read(
+        loop {
+            let result = check_isize(unsafe {
+                libc::read(
                     self.device.as_raw_fd(),
                     buf.as_mut_ptr().cast(),
                     buf.len() as _,
-                ));
-                match result {
-                    Err(ref e) if e.raw_os_error() == Some(libc::EINTR) => continue,
-                    x => return x,
-                }
+                )
+            });
+            match result {
+                Err(ref e) if e.raw_os_error() == Some(libc::EINTR) => continue,
+                x => return x,
             }
         }
-
     }
 }

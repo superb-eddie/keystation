@@ -25,7 +25,11 @@ case "${1}" in
     ksb-cargo run "${@:2}"
   ;;
   "flash")
-    log_fatal "please run"
+    ksb-cargo build "${@:2}"
+
+    firmware_bin="${KSB_BUILD_DIR}/cargo-target/avr-atmega328p/debug/keystation-firmware.elf"
+    instruction="flash:w:${firmware_bin}:e"
+    avrdude -p atmega328p -c arduino -P "${arduino_serial}" -b 1115200 -e -D -U "${instruction}"
   ;;
   "artifact-path")
     echo "${CARGO_TARGET_DIR}/avr-atmega328p/debug/keystation-firmware.elf"

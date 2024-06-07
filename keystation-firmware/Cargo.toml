@@ -13,8 +13,6 @@ bench = false
 chrono = "0.4.19"
 
 [dependencies]
-ufmt = "0.2.0"
-nb = "1.1.0"
 embedded-hal = "1.0.0"
 panic-serial = { version = "0.1.2", features = ["full"] }
 

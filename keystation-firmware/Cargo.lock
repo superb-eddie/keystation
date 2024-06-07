@@ -215,10 +215,8 @@ dependencies = [
  "avr-device",
  "chrono",
  "embedded-hal 1.0.0",
- "nb 1.1.0",
  "panic-serial",
  "proc-macro2",
- "ufmt",
 ]
 
 [[package]]

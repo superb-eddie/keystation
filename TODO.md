@@ -3,6 +3,7 @@
 - keybed firmware
   - increase velocity measurement accuracy
   - send keystrokes + velocity out the serial port
+  - enable watchdog timer
 - synth host:
   - USB serial gadget
     - update rootfs over serial? 
