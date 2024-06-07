@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+#-Help: Rebuild a package and update rootfs
+#-Use: [<buildroot_target>]
+#-Extended: This only works with targets that have a corresponding -rebuild target
+
+set -euo pipefail
+
+image_name="sdcard.img"
+rm -f "${KSB_BUILDROOT_IMAGES_DIR}/${image_name}"
+
+ksb-buildroot-build "${1}-rebuild"
+ksb-buildroot-build

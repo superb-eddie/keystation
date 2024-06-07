@@ -68,12 +68,10 @@ pub struct Keybed {
 
 impl Keybed {
     pub fn new(
-        mut shift: ShiftRegister,
+        shift: ShiftRegister,
         keys_a: [Pin<Input<Floating>>; 7],
         keys_b: [Pin<Input<Floating>>; 7],
     ) -> Self {
-        shift.enable();
-
         return Self {
             shift,
             keys_a,
@@ -82,8 +80,51 @@ impl Keybed {
         };
     }
 
-    pub fn scan(&mut self) {
+    fn next_state(a_down: bool, b_down: bool, key: Key) -> Option<Key> {
+        // | B | A | STATE | NEW_STATE | DESC                                        |
+        // |---|---|-------|-----------|---------------------------------------------|
+        // | 0 | 0 | Up    | -         | Key is in the neutral position              |
+        // | 1 | 0 | Up    | DownP     | A key press has started                     |
+        // | 0 | 1 | Up    | -         | Physically impossible                       |
+        // | 1 | 1 | Up    | Down      | Key was pressed faster than we could detect |
+        // | 0 | 0 | DownP | Up        | Key was pressed halfway, then released      |
+        // | 1 | 0 | DownP | -         | Key is travelling                           |
+        // | 0 | 1 | DownP | Up        | Physically impossible                       |
+        // | 1 | 1 | DownP | Down      | Key was pressed all the way                 |
+        // | 0 | 0 | Down  | Up        | Key press has finished                      |
+        // | 1 | 0 | Down  | -         | Key has been released                       |
+        // | 0 | 1 | Down  | Up        | Physically impossible.                      |
+        // | 1 | 1 | Down  | -         | Key is being held down                      |
+
+        return match (b_down, a_down, key) {
+            (true, false, Key::Up) => {
+                // Key is being pressed
+                Some(Key::DownPartial(millis()))
+            }
+            (true, true, Key::DownPartial(at)) => {
+                // Key was fully pressed
+                let travel_time = millis().saturating_sub(at);
+                Some(Key::Down(travel_time))
+            }
+            (true, true, Key::Up) => {
+                // Key was fully depressed before we could register the DownPartial
+                // Report as the smallest resolution
+                Some(Key::Down(2))
+            }
+            (false, _, _) => {
+                // If contact b is up, the key should be up
+                Some(Key::Up)
+            }
+            _ => {
+                None
+            }
+        }
+
+    }
+
+    pub fn scan(&mut self, mut key_update: impl FnMut(usize, Key)) {
         // Scan key matrix
+        self.shift.enable();
         for i in 0..8 {
             if i == 0 {
                 self.shift.push_high()
@@ -91,6 +132,7 @@ impl Keybed {
                 self.shift.push_low()
             }
             for j in 0..7 {
+                // Calculate a key index where the leftmost key is 0
                 let (key_index, _) =
                     ((j * 8) + (if i == 0 { 8usize } else { i })).overflowing_sub(1);
                 if key_index >= KEYS {
@@ -98,35 +140,22 @@ impl Keybed {
                     continue;
                 }
 
-                // let key = &mut keys[key_index];
                 let a_down = self.keys_a[j].is_high();
                 let b_down = self.keys_b[j].is_high();
 
-                if !b_down {
-                    // Key is always up if B is up
-                    self.keys[key_index] = Key::Up;
-                    continue;
-                }
-
-                match (a_down, self.keys[key_index]) {
-                    (false, Key::Up) => {
-                        // Key is being pressed
-                        self.keys[key_index] = Key::DownPartial(millis());
+                let state = self.keys[key_index];
+                if let Some(new_state) = Self::next_state(a_down, b_down, state) {
+                    match (state, new_state) {
+                        // Down state is always reported
+                        (_, Key::Down(_)) => key_update(key_index, new_state),
+                        // Up state is only reported when key had been fully depressed
+                        (Key::Down(_), Key::Up) => key_update(key_index, new_state),
+                        _ => {}
                     }
-                    (true, Key::DownPartial(at)) => {
-                        // Key was fully pressed
-                        let travel_time = millis().saturating_sub(at);
-                        self.keys[key_index] = Key::Down(travel_time);
-                    }
-                    (false, Key::Down(_velocity)) => {
-                        // Key is being lifted
-                        self.keys[key_index] = Key::Up
-                    }
-                    _ => {
-                        //     Nothing happens in every other case
-                    }
+                    self.keys[key_index] = new_state
                 }
             }
         }
+        self.shift.disable();
     }
 }

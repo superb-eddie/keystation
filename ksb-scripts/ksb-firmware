@@ -21,7 +21,7 @@ case "${1}" in
     ksb-cargo build "${@:2}"
   ;;
   "run")
-    export CARGO_TARGET_AVR_ATMEGA328P_RUNNER="ravedude nano-new -cb 57600 -P ${arduino_serial}"
+    export CARGO_TARGET_AVR_ATMEGA328P_RUNNER="ravedude nano-new -cb 115200 -P ${arduino_serial}"
     ksb-cargo run "${@:2}"
   ;;
   "flash")

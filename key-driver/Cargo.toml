@@ -2,3 +2,7 @@
 name = "key-driver"
 version = "0.1.0"
 edition = "2021"
+
+[dependencies]
+serial2 = "0.2.24"
+libc = "0.2.155"
