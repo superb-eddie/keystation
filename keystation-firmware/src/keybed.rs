@@ -14,29 +14,29 @@ const KEYS: usize = 49;
 macro_rules! keybed_init {
     ( $p:expr ) => {{
         let shift = ShiftRegister::new(
-            $p.d13.into_output().downgrade(),
-            $p.d12.into_output().downgrade(),
-            $p.d11.into_output().downgrade(),
+            $p.d2.into_output().downgrade(),
+            $p.d5.into_output().downgrade(),
+            $p.d4.into_output().downgrade(),
         );
 
         let keys_a: [Pin<Input<Floating>>; 7] = [
-            $p.d6.downgrade(),
-            $p.d3.downgrade(),
-            $p.a5.downgrade(),
-            $p.a3.downgrade(),
+            $p.d13.downgrade(),
             $p.a1.downgrade(),
-            $p.d10.downgrade(),
-            $p.d8.downgrade(),
+            $p.a3.downgrade(),
+            $p.a5.downgrade(),
+            $p.d6.downgrade(),
+            $p.d11.downgrade(),
+            $p.d9.downgrade(),
         ];
 
         let keys_b: [Pin<Input<Floating>>; 7] = [
-            $p.d5.downgrade(),
-            $p.d4.downgrade(),
-            $p.a4.downgrade(),
-            $p.a2.downgrade(),
             $p.a0.downgrade(),
-            $p.d9.downgrade(),
+            $p.a2.downgrade(),
+            $p.a4.downgrade(),
             $p.d7.downgrade(),
+            $p.d12.downgrade(),
+            $p.d10.downgrade(),
+            $p.d8.downgrade(),
         ];
 
         Keybed::new(shift, keys_a, keys_b)
@@ -68,10 +68,12 @@ pub struct Keybed {
 
 impl Keybed {
     pub fn new(
-        shift: ShiftRegister,
+        mut shift: ShiftRegister,
         keys_a: [Pin<Input<Floating>>; 7],
         keys_b: [Pin<Input<Floating>>; 7],
     ) -> Self {
+        shift.enable();
+
         return Self {
             shift,
             keys_a,
@@ -121,7 +123,7 @@ impl Keybed {
 
     pub fn scan(&mut self, mut key_update: impl FnMut(usize, Key)) {
         // Scan key matrix
-        self.shift.enable();
+        // self.shift.enable();
         for i in 0..8 {
             if i == 0 {
                 self.shift.push_high()
@@ -133,7 +135,7 @@ impl Keybed {
                 let (key_index, _) =
                     ((j * 8) + (if i == 0 { 8usize } else { i })).overflowing_sub(1);
                 if key_index >= KEYS {
-                    //  This matrix support more keys than we actually have
+                    //  This matrix supports more keys than we actually have
                     continue;
                 }
 
@@ -153,6 +155,6 @@ impl Keybed {
                 }
             }
         }
-        self.shift.disable();
+        // self.shift.disable();
     }
 }

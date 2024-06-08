@@ -120,14 +120,20 @@ fn start_midi() -> MidiOutputConnection {
     return midi_out.connect(out_port, "keystation").unwrap();
 }
 
-fn note_on(midi_out: &mut MidiOutputConnection, note: u8, velocity: u8) {
-    // notes 0-127, (middle c is 60)
-    // velocity 0-127
-    midi_out.send(&[0x90, note, velocity]).unwrap()
+fn midi_note(key: u8) -> u8 {
+    // midi middle c = 60
+    // keyboard middle c = 24
+    return key + (60 - 24)
 }
 
-fn note_off(midi_out: &mut MidiOutputConnection, note: u8) {
-    midi_out.send(&[0x80, note, 0]).unwrap()
+fn note_on(midi_out: &mut MidiOutputConnection, key: u8, velocity: u8) {
+    // notes 0-127
+    // velocity 0-127
+    midi_out.send(&[0x90, midi_note(key).min(127), velocity.min(127)]).unwrap()
+}
+
+fn note_off(midi_out: &mut MidiOutputConnection, key: u8) {
+    midi_out.send(&[0x80, midi_note(key), 0]).unwrap()
 }
 
 fn main() {
