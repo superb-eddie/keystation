@@ -3,6 +3,8 @@ use std::io::{stdin, stdout, Write};
 
 use midir::{Ignore, MidiInput, MidiOutput};
 
+// TODO: Turn this into something more useful
+
 fn main() {
     match run() {
         Ok(_) => (),

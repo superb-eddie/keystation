@@ -3,10 +3,12 @@ use std::io::{Read, stderr, stdout, Write};
 use std::process::Command;
 use std::thread::sleep;
 use std::time::Duration;
-use midir::{MidiOutput, MidiOutputConnection, MidiOutputPort};
 
 use crate::serial::SerialPort;
 
+//  TODO: Handle errors more gracefully once code solidifies
+
+mod midi;
 mod serial;
 
 // TODO: Detect the correct serial device. It shouldn't change, but just in case
@@ -15,6 +17,7 @@ const SERIAL_BAUD: u32 = 115_200;
 
 const FIRMWARE_BIN: &str = "/usr/share/keystation-firmware.elf";
 const FIRMWARE_VERSION: &str = "/usr/share/key-firmware-version.txt";
+const FIRMWARE_HEADER: &str = "I am a keyboard! :3 ";
 
 // TODO: Split threads for reading/writing
 
@@ -22,7 +25,7 @@ fn flash_firmware(serial: SerialPort) -> SerialPort {
     // Temporarily take ownership of serial port, so we can drop it to close the file
     drop(serial);
 
-    println!("Flashing firmware!");
+    println!("Flashing keyboard firmware!");
 
     let status = Command::new("avrdude")
         .args([
@@ -50,7 +53,7 @@ fn flash_firmware(serial: SerialPort) -> SerialPort {
         panic!("avrdude failed to flash firmware")
     }
 
-    println!("Done, waiting just a moment before proceeding...");
+    println!("Keyboard firmware updated, waiting just a moment before proceeding...");
     sleep(Duration::from_secs_f32(0.1));
 
     return SerialPort::open(SERIAL_DEVICE, SERIAL_BAUD);
@@ -75,8 +78,7 @@ fn read_firmware_message(serial: &mut SerialPort, mut buffer: [u8; 3]) -> Option
 
             serial.read_exact(&mut str_buf).unwrap();
 
-            let version =
-                String::from_utf8(str_buf[19..].to_owned()).expect("Version string was not utf8");
+            let version = String::from_utf8(str_buf).expect("Version string was not utf8");
 
             Some(FirmwareMessage::Version(version))
         }
@@ -99,41 +101,11 @@ fn read_firmware_message(serial: &mut SerialPort, mut buffer: [u8; 3]) -> Option
     };
 }
 
-fn start_midi() -> MidiOutputConnection {
-    let midi_out = MidiOutput::new("Keystation").unwrap();
-
-    // The second output port should be the one we want
-    let out_ports = midi_out.ports();
-    let out_port: &MidiOutputPort = match out_ports.len() {
-        0 => {panic!("No output ports!")}
-        1 => {
-            &out_ports[0]
-        }
-        2 => {
-            &out_ports[1]
-        }
-        _ => {
-            panic!("More than one output ports!")
-        }
-    };
-
-    return midi_out.connect(out_port, "keystation").unwrap();
-}
-
-fn midi_note(key: u8) -> u8 {
+// TODO: Support microtonal tunings
+fn note(key: u8) -> u8 {
     // midi middle c = 60
     // keyboard middle c = 24
-    return key + (60 - 24)
-}
-
-fn note_on(midi_out: &mut MidiOutputConnection, key: u8, velocity: u8) {
-    // notes 0-127
-    // velocity 0-127
-    midi_out.send(&[0x90, midi_note(key).min(127), velocity.min(127)]).unwrap()
-}
-
-fn note_off(midi_out: &mut MidiOutputConnection, key: u8) {
-    midi_out.send(&[0x80, midi_note(key), 0]).unwrap()
+    return key + (60 - 24);
 }
 
 fn main() {
@@ -145,7 +117,7 @@ fn main() {
     let mut serial = SerialPort::open(SERIAL_DEVICE, SERIAL_BAUD);
     serial.flush();
 
-    let mut midi_out = start_midi();
+    let mut midi_out = midi::start();
 
     let buffer = [0u8; 3];
     loop {
@@ -156,10 +128,10 @@ fn main() {
 
         match next_message {
             FirmwareMessage::Version(version) => {
-                if version != expected_firmware_version {
+                if version != format!("{}{}", FIRMWARE_HEADER, expected_firmware_version) {
                     println!(
-                        "Firmware version doesn't match! \n{} \n{}",
-                        expected_firmware_version, version
+                        "Firmware version doesn't match! \n{}{} \n{}",
+                        FIRMWARE_HEADER, expected_firmware_version, version
                     );
                     serial = flash_firmware(serial);
                 } else {
@@ -167,15 +139,15 @@ fn main() {
                 }
             }
             FirmwareMessage::KeyDown(key, velocity) => {
-                println!("D {} {}", key, velocity);
-                note_on(&mut midi_out, key, velocity)
+                midi::note_on(&mut midi_out, note(key), velocity);
+                // eprintln!("D {} {}", key, velocity);
             }
             FirmwareMessage::KeyUp(key) => {
-                println!("U {}", key);
-                note_off(&mut midi_out, key)
+                midi::note_off(&mut midi_out, note(key));
+                // eprintln!("U {}", key);
             }
             FirmwareMessage::Panic() => {
-                // TODO: Add watchdog to arduino, then set a timeout here and wait for it to restart
+                // TODO: Add watchdog to arduino, then we could set a timeout here and wait for it to restart
                 panic!("Arduino panicked!")
             }
         }

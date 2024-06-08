@@ -1,0 +1,45 @@
+#!/bin/sh
+
+key_driver_bin="key-driver"
+key_driver_path="/usr/bin/${key_driver_bin}"
+key_driver_log="/var/log/${key_driver_bin}.log"
+
+[ -f "${key_driver_path}" ] || exit 0
+
+umask 077
+
+log() {
+	echo "$1" | tee /dev/kmsg >> "${key_driver_log}"
+}
+
+start() {
+# TODO: Try starting with $JACK_START_SERVER defined
+    "${key_driver_path}" >> "${key_driver_log}" 2>&1 &
+}
+stop() {
+    killall -q "${key_driver_bin}"
+}
+restart() {
+    stop
+    start
+}
+
+case "$1" in
+  start)
+    log "starting ${key_driver_bin}"
+    start
+    ;;
+  stop)
+    log "stopping ${key_driver_bin}"
+    stop
+    ;;
+  restart|reload)
+    log "restarting ${key_driver_bin}"
+    restart
+    ;;
+  *)
+    echo "Usage: $0 {start|stop|restart}"
+    exit 1
+esac
+
+exit $?

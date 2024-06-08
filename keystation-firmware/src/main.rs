@@ -24,7 +24,7 @@ type Serial = Usart<USART0, Pin<Input, PD0>, Pin<Output, PD1>>;
 panic_serial::impl_panic_handler!(Serial);
 
 const FIRMWARE_VERSION: &str = concat!(
-    "I am a keyboard :) ",
+    "I am a keyboard! :3 ",
     include_str!(concat!(
         env!("OUT_DIR"),
         "/../../../key-firmware-version.txt"

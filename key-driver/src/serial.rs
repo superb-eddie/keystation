@@ -3,11 +3,11 @@
 
 use std::{fs, io};
 use std::io::Write;
-use std::os::unix::fs::OpenOptionsExt;
 use std::os::fd::AsRawFd;
+use std::os::unix::fs::OpenOptionsExt;
 use std::path::Path;
 
-//  TODO: Replace some of the libc here with the nix crate (rusty wrapper around libc) 
+//  TODO: Replace some of the libc here with the nix crate (rusty wrapper around libc)
 
 fn check(ret: i32) -> io::Result<i32> {
     if ret == -1 {
