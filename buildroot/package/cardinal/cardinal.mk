@@ -5,7 +5,7 @@ CARDINAL_GIT_SUBMODULES = YES
 CARDINAL_DL_OPTS = --recurse-submodules
 CARDINAL_INSTALL_STAGING = NO
 CARDINAL_INSTALL_TARGET = YES
-CARDINAL_DEPENDENCIES = liblo fftw-single libsndfile libarchive libsamplerate jansson speexdsp
+CARDINAL_DEPENDENCIES = alsa-lib liblo fftw-single libsndfile libarchive libsamplerate jansson speexdsp
 
 define CARDINAL_BUILD_CMDS
     $(MAKE) $(TARGET_CONFIGURE_OPTS) CROSS_COMPILING=true HEADLESS=true -C $(@D)

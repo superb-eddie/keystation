@@ -15,6 +15,11 @@ log() {
 start() {
 # TODO: Try starting with $JACK_START_SERVER defined
     "${cardinal_path}" >> "${cardinal_log}" 2>&1 &
+
+    jack_connect Cardinal:audio_out_1 system:playback_1
+    jack_connect Cardinal:audio_out_2 system:playback_2
+    jack_connect Cardinal:events-in system:midi_capture_1
+    jack_connect Cardinal:midi-out system:midi_playback_1
 }
 stop() {
     killall -q "${cardinal_bin}"

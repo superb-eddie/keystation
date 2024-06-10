@@ -1,0 +1,9 @@
+config BR2_PACKAGE_JACK_TOOLS
+	bool "jack-tools"
+	depends on BR2_PACKAGE_JACK2
+	depends on BR2_PACKAGE_ALSA_LIB
+	select BR2_PACKAGE_HOST_PKG_CONF
+	select BR2_PACKAGE_LIBSNDFILE
+    select BR2_PACKAGE_LIBSAMPLERATE
+	help
+	    Official examples and tools from the JACK project
