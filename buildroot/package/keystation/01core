@@ -2,7 +2,6 @@ ch341
 dwc2
 i2c_dev
 i2c_bcm2835
-snd_bcm2835
 snd_soc_pcm512x_i2c
 snd_soc_bcm2835_i2s
 clk_hifiberry_dacpro

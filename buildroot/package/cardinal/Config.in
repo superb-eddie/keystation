@@ -1,5 +1,13 @@
 config BR2_PACKAGE_CARDINAL
 	bool "cardinal"
 	select BR2_PACKAGE_LIBLO
+	select BR2_PACKAGE_FFTW
+	select BR2_PACKAGE_FFTW_FAST
+	select BR2_PACKAGE_FFTW_SINGLE
+	select BR2_PACKAGE_LIBSNDFILE
+	select BR2_PACKAGE_LIBARCHIVE
+	select BR2_PACKAGE_LIBSAMPLERATE
+	select BR2_PACKAGE_JANSSON
+	select BR2_PACKAGE_SPEEXDSP
 	help
 	    Virtual modular synthesizer plugin

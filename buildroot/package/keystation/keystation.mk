@@ -11,8 +11,8 @@ define KEYSTATION_LINUX_CONFIG_FIXUPS
 endef
 
 define KEYSTATION_INSTALL_TARGET_CMDS
-	$(INSTALL) -D -m 755 $(KEYSTATION_PKGDIR)/01core $(TARGET_DIR)/etc/modules.d/01core; \
-	$(INSTALL) -D -m 644 $(KEYSTATION_PKGDIR)/asound.conf $(TARGET_DIR)/etc/asound.conf;
+	$(INSTALL) -D -m 755 $(KEYSTATION_PKGDIR)/01core $(TARGET_DIR)/etc/modules.d/01core;
 endef
+#	$(INSTALL) -D -m 644 $(KEYSTATION_PKGDIR)/asound.conf $(TARGET_DIR)/etc/asound.conf;
 
 $(eval $(generic-package))

@@ -3,17 +3,27 @@ fixup_file=fixup4.dat
 
 kernel=Image
 
-max_usb_current=1
+# Automatically load overlays for detected DSI displays
+display_auto_detect=1
+
+# Run in 64-bit mode
 arm_64bit=1
 
-dtparam=audio=on
+# Run as fast as firmware / board allows
+arm_boost=1
+
+max_usb_current=1
+
+dtparam=audio=off
 dtparam=i2c_arm=on
 dtparam=i2s=on
-dtparam=audio=on
-audio_pwm_mode=2
+# Enable MMAP support (Jackd, etc.)
+dtoverlay=i2s-mmap
+
+dtoverlay=allo-boss-dac-pcm512x-audio
+
 dtoverlay=disable-wifi
 dtoverlay=disable-bt
 dtoverlay=vc4-kms-v3d-pi4
 dtoverlay=imx219
 dtoverlay=dwc2
-dtoverlay=allo-boss-dac-pcm512x-audio,slave

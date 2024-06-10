@@ -1,6 +1,6 @@
 #!/bin/sh
 
-cardinal_bin="CardinalNative"
+cardinal_bin="Cardinal"
 cardinal_path="/usr/local/bin/${cardinal_bin}"
 cardinal_log="/var/log/${cardinal_bin}.log"
 

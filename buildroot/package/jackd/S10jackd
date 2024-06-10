@@ -13,7 +13,7 @@ log() {
 }
 
 start() {
-    "${jackd_path}" -d alsa >> "${jackd_log}" 2>&1 &
+    "${jackd_path}" -P 70 -t 2000 -s -d alsa -d hw:BossDAC -r 48000 -p 256 -n 2 -X raw >> "${jackd_log}" 2>&1 &
 }
 stop() {
     killall -q "${jackd_bin}"
