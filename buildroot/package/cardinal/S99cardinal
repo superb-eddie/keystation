@@ -13,12 +13,13 @@ log() {
 }
 
 start() {
-    "${cardinal_path}" >> "${cardinal_log}" 2>&1 &
+    chrt 70 "${cardinal_path}" >> "${cardinal_log}" 2>&1 &
 
     while ! jack_lsp | grep "Cardinal"; do
       echo "Waiting for Cardinal to start..."
       sleep 0.1
     done
+    sleep 0.1
 
     jack_connect Cardinal:audio_out_1 system:playback_1
     jack_connect Cardinal:audio_out_2 system:playback_2
@@ -26,6 +27,8 @@ start() {
     jack_connect Cardinal:midi-out system:midi_playback_1
 
     jack_connect keystation:midi_out Cardinal:events-in
+
+    patch-loader key_test
 }
 stop() {
     killall -q "${cardinal_bin}"

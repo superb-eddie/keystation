@@ -1,9 +1,0 @@
-config BR2_PACKAGE_MIDI_TOOLS
-	bool "midi-tools"
-    depends on BR2_PACKAGE_HOST_RUSTC_TARGET_ARCH_SUPPORTS
-    select BR2_PACKAGE_HOST_RUSTC
-	help
-	    CLI tools for introspecting midi devices
-
-comment "midi-tools needs rustc with target arch support"
-    depends on !BR2_PACKAGE_HOST_RUSTC_TARGET_ARCH_SUPPORTS
