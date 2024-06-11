@@ -5,5 +5,4 @@ edition = "2021"
 
 [dependencies]
 libc = "0.2.155"
-midir = "0.10.0"
-#nix = { version = "0.29.0", default-features = false, features = ["term"] }
+midir = { version = "0.10.0", default-features = false, features = ["jack"]}

@@ -1,8 +1,10 @@
 config BR2_PACKAGE_KEY_DRIVER
 	bool "key-driver"
-    depends on BR2_PACKAGE_HOST_RUSTC_TARGET_ARCH_SUPPORTS
+    depends on BR2_PACKAGE_HOST_RUSTC_TARGET_ARCH_SUPPORT
+	depends on BR2_PACKAGE_JACK2
     select BR2_PACKAGE_HOST_RUSTC
     select BR2_PACKAGE_KEY_FIRMWARE
+    select BR2_PACKAGE_JACK_TOOLS
 	help
 	    Userspace driver for the keyboard
 

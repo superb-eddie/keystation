@@ -2,7 +2,7 @@ KEY_DRIVER_VERSION = 0.0.1
 KEY_DRIVER_SITE = $(BR2_EXTERNAL_KBS_PATH)/package/key-driver/source
 KEY_DRIVER_SITE_METHOD = local
 KEY_DRIVER_INSTALL_TARGET = YES
-KEY_DRIVER_DEPENDENCIES = host-rustc key-firmware
+KEY_DRIVER_DEPENDENCIES = host-rustc key-firmware jack2
 
 define KEY_DRIVER_INSTALL_SERVICE
 	$(INSTALL) -D -m 755 $(KEY_DRIVER_PKGDIR)/S50key-driver $(TARGET_DIR)/etc/init.d/S50key-driver
