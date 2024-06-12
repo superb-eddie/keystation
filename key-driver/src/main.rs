@@ -17,7 +17,7 @@ mod serial;
 const SERIAL_DEVICE: &str = "/dev/ttyUSB0";
 const SERIAL_BAUD: u32 = 115_200;
 
-const FIRMWARE_BIN: &str = "/usr/share/keystation-firmware.elf";
+const FIRMWARE_BIN: &str = "/usr/share/keys-firmware.elf";
 const FIRMWARE_VERSION: &str = "/usr/share/key-firmware-version.txt";
 const FIRMWARE_HEADER: &str = "I am a keyboard! :3 ";
 

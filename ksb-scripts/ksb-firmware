@@ -5,7 +5,7 @@
 set -euo pipefail
 source "${KSB_SCRIPTS_LIB_DIR}/logging.sh"
 
-firmware_src_dir="${KSB_PROJECT_ROOT}/keystation-firmware"
+firmware_src_dir="${KSB_PROJECT_ROOT}/key-firmware"
 
 # TODO: Detect serial
 arduino_serial="/dev/ttyUSB0"
@@ -27,12 +27,12 @@ case "${1}" in
   "flash")
     ksb-cargo build "${@:2}"
 
-    firmware_bin="${KSB_BUILD_DIR}/cargo-target/avr-atmega328p/debug/keystation-firmware.elf"
+    firmware_bin="${KSB_BUILD_DIR}/cargo-target/avr-atmega328p/debug/key-firmware.elf"
     instruction="flash:w:${firmware_bin}:e"
     avrdude -p atmega328p -c arduino -P "${arduino_serial}" -b 115200 -e -D -U "${instruction}"
   ;;
   "artifact-path")
-    echo "${CARGO_TARGET_DIR}/avr-atmega328p/debug/keystation-firmware.elf"
+    echo "${CARGO_TARGET_DIR}/avr-atmega328p/debug/key-firmware.elf"
   ;;
   *)
     log_fatal "unknown command ${1}"

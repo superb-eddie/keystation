@@ -16,6 +16,7 @@ max_usb_current=1
 
 dtparam=audio=off
 dtparam=i2c_arm=on
+dtparam=i2c_baudrate=400000
 dtparam=i2s=on
 # Enable MMAP support (Jackd, etc.)
 dtoverlay=i2s-mmap
