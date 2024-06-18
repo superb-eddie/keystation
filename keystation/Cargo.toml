@@ -1,0 +1,10 @@
+[package]
+name = "keystation"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+ssd1306 = "0.8.4"
+embedded-graphics = "0.8.1"
+tinybmp = "0.6.0"
+rppal = { version = "0.18.0", features = ["hal"] }

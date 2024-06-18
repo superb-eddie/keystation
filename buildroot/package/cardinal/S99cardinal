@@ -13,7 +13,7 @@ log() {
 }
 
 start() {
-    chrt 70 "${cardinal_path}" >> "${cardinal_log}" 2>&1 &
+    "${cardinal_path}" >> "${cardinal_log}" 2>&1 &
 
     while ! jack_lsp | grep "Cardinal"; do
       echo "Waiting for Cardinal to start..."
