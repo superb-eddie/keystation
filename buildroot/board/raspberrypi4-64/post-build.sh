@@ -3,6 +3,14 @@
 set -u
 set -e
 
+boot_fstab="/dev/mmcblk0p1  /boot   vfat    defaults        0       1"
+if [ -e "${TARGET_DIR}/etc/fstab" ]; then
+mkdir -p "${TARGET_DIR}/boot"
+	if ! grep -q "${boot_fstab}" "${TARGET_DIR}/etc/fstab"; then
+		echo "${boot_fstab}" >>"${TARGET_DIR}/etc/fstab";
+	fi
+fi
+
 # Add a console on tty1
 if [ -e ${TARGET_DIR}/etc/inittab ]; then
     grep -qE '^tty1::' ${TARGET_DIR}/etc/inittab || \
