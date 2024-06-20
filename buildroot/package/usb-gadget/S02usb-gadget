@@ -90,13 +90,13 @@ configure_gadget() {
 
   gadget_new_function "midi.usb0"
 #   TODO: any config?
-  gadget_new_function "serial.usb1"
+  gadget_new_function "acm.usb1"
 #   TODO: any config?
 
   gadget_new_config "c.1"
-  gadget_config_string "configuration" "Keystation MIDI+Serial"
+  gadget_config_string "configuration" "Keystation MIDI+ACM"
   gadget_config_link_function "midi.usb0"
-  gadget_config_link_function "serial.usb1"
+  gadget_config_link_function "acm.usb1"
 }
 
 # Connect our gadget to the UDC
