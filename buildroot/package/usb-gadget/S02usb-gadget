@@ -1,0 +1,134 @@
+#!/bin/sh
+
+# USB gadget config lib
+
+CONFIGFS_HOME="/sys/kernel/config"
+UDC_DEVICE="fe980000.usb"
+
+required() {
+   if [ "${2}x" = "x" ]; then
+     echo "${1} required"
+     exit 1
+   fi
+}
+
+new_gadget() {
+  required "gadget name" "${1}"
+  gadget_name="${1}"
+
+  export GADGET_HOME="${CONFIGFS_HOME}/usb_gadget/${gadget_name}"
+  mkdir -p "${GADGET_HOME}"
+
+  export GADGET_STRINGS_HOME="${GADGET_HOME}/strings/0x409"
+  mkdir -p "${GADGET_STRINGS_HOME}"
+
+  export GADGET_FUNCTIONS_HOME="${GADGET_HOME}/functions"
+  mkdir -p "${GADGET_FUNCTIONS_HOME}"
+
+  export GADGET_CONFIGS_HOME="${GADGET_HOME}/configs"
+  mkdir -p "${GADGET_CONFIGS_HOME}"
+}
+
+gadget_vendor_id() {
+  required "vendor id" "${1}"
+  echo "${1}" > "${GADGET_HOME}/idVendor"
+}
+
+gadget_product_id() {
+  required "product id" "${1}"
+  echo "${1}" > "${GADGET_HOME}/idProduct"
+}
+
+gadget_string() {
+  required "string name" "${1}"
+  required "${1}" "${2}"
+  echo "${2}" > "${GADGET_STRINGS_HOME}/${1}"
+}
+
+gadget_new_function() {
+  required "function name" "${1}"
+
+  export FUNCTION_HOME="${GADGET_FUNCTIONS_HOME}/${1}"
+  mkdir -p "${FUNCTION_HOME}"
+}
+
+gadget_new_config() {
+  required "config name" "${1}"
+
+  export CONFIG_HOME="${GADGET_CONFIGS_HOME}/${1}"
+  mkdir -p "${CONFIG_HOME}"
+
+  export CONFIG_STRINGS_HOME="${GADGET_CONFIGS_HOME}/${1}/strings/0x409"
+  mkdir -p "${CONFIG_HOME}"
+}
+
+gadget_config_string() {
+  required "string name" "${1}"
+  required "${1}" "${2}"
+  echo "${2}" > "${CONFIG_STRINGS_HOME}/${1}"
+}
+
+gadget_config_link_function() {
+  required "function name" "${1}"
+  ln -s "${GADGET_FUNCTIONS_HOME}/${1}" "${CONFIG_HOME}"
+}
+
+# end config functions
+
+klog() {
+  echo "$1" | tee /dev/kmsg
+}
+
+# Configure our usb gadget
+configure_gadget() {
+  new_gadget "keystation"
+  gadget_vendor_id "0xB3B3"
+  gadget_product_id "0x0420"
+  gadget_string "serialnumber" "I am a keyboard :3"
+  gadget_string "manufacturer" "Moreland&Moreland Associates"
+  gadget_string "product" "Keystation"
+
+  gadget_new_function "midi.usb0"
+#   TODO: any config?
+  gadget_new_function "serial.usb1"
+#   TODO: any config?
+
+  gadget_new_config "c.1"
+  gadget_config_string "configuration" "Keystation MIDI+Serial"
+  gadget_config_link_function "midi.usb0"
+  gadget_config_link_function "serial.usb1"
+}
+
+# Connect our gadget to the UDC
+connect_gadget() {
+  echo "${UDC_DEVICE}" > "${CONFIGFS_HOME}/usb_gadget/keystation/UDC"
+}
+
+# Disconnect our gadget from the UDC
+disconnect_gadget() {
+  echo "" > "${CONFIGFS_HOME}/usb_gadget/keystation/UDC"
+}
+
+case "$1" in
+  start)
+    configure_gadget
+    connect_gadget
+  ;;
+  reload)
+    configure_gadget
+	;;
+	restart)
+	  disconnect_gadget
+    configure_gadget
+	  connect_gadget
+	;;
+	stop)
+	  disconnect_gadget
+	;;
+  *)
+    echo "Usage: $0 {start|stop|restart|reload}"
+    exit 1
+  ;;
+esac
+
+exit $?

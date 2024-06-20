@@ -3,6 +3,6 @@ config BR2_PACKAGE_KEYSTATION
 	select BR2_PACKAGE_LOADMODULES
 	select BR2_PACKAGE_CARDINAL
 	select BR2_PACKAGE_PATCH_LOADER
-	select BR2_PACKAGE_MIDI_GADGET
+	select BR2_PACKAGE_USB_GADGET
 	help
 	    Meta package for the keystation os

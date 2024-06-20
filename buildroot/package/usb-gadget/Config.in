@@ -1,0 +1,5 @@
+config BR2_PACKAGE_USB_GADGET
+	bool "usb-gadget"
+	select BR2_PACKAGE_LOADMODULES
+	help
+	    Configure a usb gadget for midi + serial
