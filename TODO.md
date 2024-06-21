@@ -1,34 +1,30 @@
 # TODO
-- bring rustup installer into source, maybe vendor rust?
-- keybed firmware
-  - increase velocity measurement accuracy
-  - send keystrokes + velocity out the serial port
+- firmware
+  - increase timer accuracy
   - enable watchdog timer
-- synth host:
-  - USB serial gadget
-    - update rootfs over serial? 
-  - independent power source
-  - get OLED working
-    - https://www.adafruit.com/product/3531
-  - serial port gadget for debugging?
-  - expose block storage over usb when in "instrument" mode to upload patches
-  - expose midi when in "midi" mode
-  - Maybe also expose a "flashing" mode?
-  - OLED screen should be able to switch between internal synth and midi
-  - Do we have enough I/O to connect volume/pitch and buttons to the pi?
-  - pi should check which firmware the arduino is running, and flash the current version if needed
-- Janko conversion
-  - replicate key mechanism in cad
-  - build janko keys on top
-  - 3d print
-- Hardware mounting
-  - Measure existing holes
-  - Which ports to expose?
-    - Maybe ethernet? Could expose OSC
-    - usb for power/data
-      - Can we power pi+arduino from usb power when connected to a computer?
-    - audio out
-      - With a decent dac, maybe export in+out to work as effects host?
-    - power switch?
-- Stretch goals
-  - Build a custom board for CM4+arduino?
+- operating system
+  - decrease boot time
+  - expose patch folder over usb
+  - components
+    - key-driver
+      - implement velocity calculations
+      - read inputs from buttons/controls on keyboard
+    - key-station
+      - expose an api for other components to control the system
+      - expose the same api over a second usb serial port 
+      - absorb patch-loader functionality
+      - support rootfs updating/switching
+      - support boot partition updating
+    - key-controller
+      - absorb screen responsibility
+      - read inputs next to screen
+      - show UI to control the system
+      - show screensaver when UI hasn't update in awhile (OLED burn in prevention)
+- hardware
+  - connect buttons on OLED board
+  - connect buttons+led on keyboard
+  - find ADC for analog controls
+  - replace keys with an isomorphic layout
+    - replicate key mechanism in CAD
+    - janko
+    - flat bars
