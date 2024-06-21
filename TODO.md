@@ -9,7 +9,7 @@
     - key-driver
       - implement velocity calculations
       - read inputs from buttons/controls on keyboard
-    - key-station
+    - keystation
       - expose an api for other components to control the system
       - expose the same api over a second usb serial port 
       - absorb patch-loader functionality

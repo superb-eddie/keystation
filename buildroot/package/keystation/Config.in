@@ -1,8 +1,9 @@
 config BR2_PACKAGE_KEYSTATION
 	bool "keystation"
 	select BR2_PACKAGE_LOADMODULES
+	select BR2_PACKAGE_JACKD
 	select BR2_PACKAGE_CARDINAL
 	select BR2_PACKAGE_PATCH_LOADER
 	select BR2_PACKAGE_USB_GADGET
 	help
-	    Meta package for the keystation os
+	   OS root package, includes "keystation" system daemon
