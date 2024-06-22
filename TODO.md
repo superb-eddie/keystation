@@ -1,4 +1,6 @@
 # TODO
+- repo
+  - Thorough readme with goals/plans/pictures
 - firmware
   - increase timer accuracy
   - enable watchdog timer
