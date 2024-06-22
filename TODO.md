@@ -7,6 +7,7 @@
   - expose patch folder over usb
   - components
     - key-driver
+      - replace libc with existing safe wrappers
       - implement velocity calculations
       - read inputs from buttons/controls on keyboard
     - keystation
@@ -19,7 +20,7 @@
       - absorb screen responsibility
       - read inputs next to screen
       - show UI to control the system
-      - show screensaver when UI hasn't update in awhile (OLED burn in prevention)
+      - show screensaver when UI hasn't updated in a while (OLED burn in prevention)
 - hardware
   - connect buttons on OLED board
   - connect buttons+led on keyboard

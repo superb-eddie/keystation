@@ -1,0 +1,9 @@
+config BR2_PACKAGE_KEY_CONTROLLER
+	bool "key-controller"
+    depends on BR2_PACKAGE_HOST_RUSTC_TARGET_ARCH_SUPPORTS
+    select BR2_PACKAGE_HOST_RUSTC
+	help
+	    Runs keyboard menu on the OLED screen
+
+comment "key-controller needs rustc with target arch support"
+    depends on !BR2_PACKAGE_HOST_RUSTC_TARGET_ARCH_SUPPORTS

@@ -62,15 +62,14 @@ gadget_new_config() {
   mkdir -p "${CONFIG_HOME}"
 }
 
-gadget_config_string() {
-  required "string name" "${1}"
-  required "${1}" "${2}"
-  echo "${2}" > "${CONFIG_STRINGS_HOME}/${1}"
-}
-
 gadget_config_link_function() {
   required "function name" "${1}"
   ln -s "${GADGET_FUNCTIONS_HOME}/${1}" "${CONFIG_HOME}"
+}
+
+gadget_config_function() {
+  gadget_new_function "$@"
+  gadget_config_link_function "$@"
 }
 
 # end config functions
@@ -88,15 +87,12 @@ configure_gadget() {
   gadget_string "manufacturer" "Moreland&Moreland Associates"
   gadget_string "product" "Keystation"
 
-  gadget_new_function "midi.usb0"
-#   TODO: any config?
-  gadget_new_function "acm.usb1"
-#   TODO: any config?
-
   gadget_new_config "c.1"
-  gadget_config_string "configuration" "Keystation MIDI+ACM"
-  gadget_config_link_function "midi.usb0"
-  gadget_config_link_function "acm.usb1"
+  gadget_config_function "midi.usb0"
+  # The first acm will run a shell for debugging
+  gadget_config_function "acm.usb1"
+  # The second acm will expose a control api
+  gadget_config_function "acm.usb2"
 }
 
 # Connect our gadget to the UDC
