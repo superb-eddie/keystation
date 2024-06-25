@@ -6,12 +6,11 @@ use std::time::Duration;
 
 use midir::{MidiOutput, MidiOutputConnection};
 use midir::os::unix::VirtualOutput;
+use rs_tty::TTY;
 
-use crate::serial::SerialPort;
 
 //  TODO: Handle errors more gracefully once code solidifies
 
-mod serial;
 
 // TODO: Detect the correct serial device. It shouldn't change, but just in case
 const SERIAL_DEVICE: &str = "/dev/ttyUSB0";
@@ -30,7 +29,7 @@ const MIDI_NOTE_OFF: u8 = 0x80 + MIDI_CHANNEL;
 
 // TODO: Split threads for reading/writing
 
-fn flash_firmware(serial: SerialPort) -> SerialPort {
+fn flash_firmware(serial: TTY) -> TTY {
     // Temporarily take ownership of serial port, so we can drop it to close the file
     drop(serial);
 
@@ -65,7 +64,7 @@ fn flash_firmware(serial: SerialPort) -> SerialPort {
     println!("Keyboard firmware updated, waiting just a moment before proceeding...");
     sleep(Duration::from_secs_f32(0.1));
 
-    return SerialPort::open(SERIAL_DEVICE, SERIAL_BAUD);
+    return TTY::open(SERIAL_DEVICE, SERIAL_BAUD);
 }
 
 enum FirmwareMessage {
@@ -75,7 +74,7 @@ enum FirmwareMessage {
     Panic(),
 }
 
-fn read_next_firmware_message(serial: &mut SerialPort, mut buffer: [u8; 3]) -> FirmwareMessage {
+fn read_next_firmware_message(serial: &mut TTY, mut buffer: [u8; 3]) -> FirmwareMessage {
     serial.read_exact(&mut buffer[0..1]).unwrap();
 
     loop {
@@ -155,7 +154,7 @@ fn main() {
     let expected_firmware_version =
         fs::read_to_string(FIRMWARE_VERSION).expect("Could not read expected firmware version");
 
-    let mut serial = SerialPort::open(SERIAL_DEVICE, SERIAL_BAUD);
+    let mut serial = TTY::open(SERIAL_DEVICE, SERIAL_BAUD);
     serial.flush();
 
     let midi_out = MidiOutput::new(MIDI_CLIENT_NAME).unwrap();

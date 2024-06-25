@@ -1,0 +1,8 @@
+[package]
+name = "key-driver"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+midir = { version = "0.10.0", default-features = false, features = ["jack"]}
+rs-tty = { path = "../rs-tty" }

@@ -15,7 +15,6 @@ define KEY_FIRMWARE_INSTALL_TARGET_CMDS
 	mkdir -p $(TARGET_DIR)/usr/share/;
 	$(INSTALL) -D -m 655 $(KEY_FIRMWARE_ARTIFACT_PATH)/$(KEY_FIRMWARE_BIN) $(TARGET_DIR)/usr/share/$(KEY_FIRMWARE_BIN)
 	$(INSTALL) -D -m 655 $(KEY_FIRMWARE_ARTIFACT_PATH)/key-firmware-version.txt $(TARGET_DIR)/usr/share/key-firmware-version.txt
-
 endef
 
 $(eval $(generic-package))
