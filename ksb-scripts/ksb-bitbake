@@ -1,0 +1,66 @@
+#!/usr/bin/env bash
+#-Help: invoke bitbake
+#-Use: (self-test|)
+
+set -euo pipefail
+source "${KSB_SCRIPTS_LIB_DIR}/logging.sh"
+
+export KSB_BITBAKE_DIR="${KSB_VENDOR_DIR}/bitbake"
+export KSB_BITBAKE_REPO_DIR="${KSB_PROJECT_ROOT}/bitbake"
+export KSB_BITBAKE_BUILD_DIR="${KSB_BUILD_DIR}/bitbake"
+export KSB_BITBAKE_WORK_DIR="${KSB_BITBAKE_BUILD_DIR}/work"
+
+
+function link_layers() {
+  base_dir="${1}"
+  layers_file="${2}"
+
+  cat "${layers_file}" | while read -r layer || [[ -n $layer ]];
+  do
+    layer_dir="${base_dir}/${layer}"
+    if [[ ! -d "${layer_dir}" ]]; then
+      log_fatal "No such directory ${layer_dir}"
+    fi
+
+    layer_name="$(basename "${layer_dir}")"
+
+    ln -sr "${layer_dir}" "${KSB_BITBAKE_BUILD_DIR}/${layer_name}"
+
+  done
+}
+
+function init_bitbake() {
+  ksb-vendor
+  link_layers "${KSB_VENDOR_DIR}" "${KSB_BITBAKE_REPO_DIR}/vendor_layers"
+  link_layers "${KSB_BITBAKE_REPO_DIR}" "${KSB_BITBAKE_REPO_DIR}/layers"
+
+  mkdir "${KSB_BITBAKE_WORK_DIR}"
+  ln -sr "${KSB_BITBAKE_REPO_DIR}/conf" "${KSB_BITBAKE_WORK_DIR}/conf"
+}
+
+if [[ ! -d "${KSB_BITBAKE_BUILD_DIR}" ]]; then
+  mkdir -p "${KSB_BITBAKE_BUILD_DIR}"
+  init_bitbake
+fi
+
+case "${1}" in
+  "clean")
+    rm -rf "${KSB_BITBAKE_BUILD_DIR}"
+  ;;
+  "reinit")
+    rm -rf "${KSB_BITBAKE_BUILD_DIR}"
+    mkdir -p "${KSB_BITBAKE_BUILD_DIR}"
+    cd "${KSB_BITBAKE_BUILD_DIR}"
+    init_bitbake
+  ;;
+  "build")
+    export PATH="${KSB_BITBAKE_DIR}/bin:$PATH"
+    export PYTHONPATH="${KSB_BITBAKE_DIR}/lib:${PYTHONPATH:-}"
+    pushd "${KSB_BITBAKE_WORK_DIR}"
+    bitbake "${@:2}"
+    popd
+  ;;
+  *)
+    log_fatal "unknown command ${1}"
+  ;;
+esac

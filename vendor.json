@@ -16,5 +16,37 @@
     "type": "git",
     "url": "git@github.com:rust-lang/rustup.git",
     "version": "1.27.1"
+  },
+  {
+    "name": "bitbake",
+    "type": "git",
+    "url": "git://git.openembedded.org/bitbake",
+    "version": "2.8"
+  },
+  {
+    "name": "openembedded-core",
+    "type": "git",
+    "url": "git://git.openembedded.org/openembedded-core",
+    "version": "scarthgap"
+  },
+  {
+    "name": "meta-openembedded",
+    "type": "git",
+    "url": "git://git.openembedded.org/meta-openembedded",
+    "version": "scarthgap"
+  },
+
+
+  {
+    "name": "meta-raspberrypi",
+    "type": "git",
+    "url": "git://git.yoctoproject.org/meta-raspberrypi",
+    "version": "scarthgap"
+  },
+  {
+    "name": "meta-security",
+    "type": "git",
+    "url": "git://git.yoctoproject.org/meta-security",
+    "version": "scarthgap"
   }
 ]

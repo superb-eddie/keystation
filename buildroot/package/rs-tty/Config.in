@@ -1,0 +1,9 @@
+config BR2_PACKAGE_RS_TTY
+	bool "rs-tty"
+    depends on BR2_PACKAGE_HOST_RUSTC_TARGET_ARCH_SUPPORTS
+    select BR2_PACKAGE_HOST_RUSTC
+	help
+	    Rust crate for interacting with TTYs
+
+comment "rs-tty needs rustc with target arch support"
+    depends on !BR2_PACKAGE_HOST_RUSTC_TARGET_ARCH_SUPPORTS

@@ -5,6 +5,7 @@ config BR2_PACKAGE_KEY_DRIVER
     select BR2_PACKAGE_HOST_RUSTC
     select BR2_PACKAGE_KEY_FIRMWARE
     select BR2_PACKAGE_JACK_TOOLS
+    select BR2_PACKAGE_RS_TTY
 	help
 	    Userspace driver for the keyboard
 
