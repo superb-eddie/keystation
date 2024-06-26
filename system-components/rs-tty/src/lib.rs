@@ -5,41 +5,74 @@ use std::io::Write;
 use std::os::fd::{AsFd, AsRawFd};
 use std::os::unix::fs::OpenOptionsExt;
 use std::path::Path;
-use nix::errno::Errno;
-use nix::libc::{O_NOCTTY, O_NONBLOCK, POLLIN};
-use nix::poll::{PollFd, PollFlags};
-use nix::sys::termios::{BaudRate, cfmakeraw, cfsetspeed, ControlFlags, InputFlags, SetArg, tcgetattr, tcsetattr};
-use nix::unistd::read;
 
+use nix::libc::{O_NOCTTY, O_NONBLOCK};
 
-fn poll(file: &fs::File, events: std::os::raw::c_short) -> bool {
-    // TODO: Can we keep this around instead?
-    PollFd::new(file.as_fd(), PollFlags::from_bits(events).unwrap()).any().unwrap()
+fn check(ret: i32) -> io::Result<i32> {
+    if ret == -1 {
+        Err(io::Error::last_os_error())
+    } else {
+        Ok(ret)
+    }
 }
 
-fn set_termios(file: &mut fs::File, rate: BaudRate) {
+/// Check the return value of a syscall for errors.
+fn check_isize(ret: isize) -> io::Result<usize> {
+    if ret == -1 {
+        Err(io::Error::last_os_error())
+    } else {
+        Ok(ret as usize)
+    }
+}
 
-    let mut termios = tcgetattr(file.as_fd()).expect("Could not get termios");
+fn poll(file: &fs::File, events: std::os::raw::c_short) -> io::Result<bool> {
+    let mut poll_fd = libc::pollfd {
+        fd: file.as_raw_fd(),
+        events,
+        revents: 0,
+    };
+    check(unsafe { libc::poll(&mut poll_fd, 1, -1) })?;
+    Ok(poll_fd.revents != 0)
+}
 
-    cfmakeraw(&mut termios);
+fn set_termios(file: &mut fs::File, rate: u32) {
+    // Get the current termios settings
+    let mut termios: libc::termios2 = unsafe {
+        let mut termios = std::mem::zeroed();
+        check(libc::ioctl(
+            file.as_raw_fd(),
+            libc::TCGETS2 as _,
+            &mut termios,
+        ))
+        .unwrap();
+
+        // Make raw to disable any OS shenanigans
+        libc::cfmakeraw(&mut termios as *mut _ as *mut libc::termios);
+        termios
+    };
 
     // No flow control
-    termios.input_flags &= !(InputFlags::IXON | InputFlags::IXOFF);
-    termios.control_flags &= !ControlFlags::CRTSCTS;
+    termios.c_iflag &= !(libc::IXON | libc::IXOFF);
+    termios.c_cflag &= !libc::CRTSCTS;
 
     // No parity
-    termios.control_flags &= !ControlFlags::PARODD & !ControlFlags::PARENB;
+    termios.c_cflag &= !libc::PARODD & !libc::PARENB;
 
     // One stop bit
-    termios.control_flags &= !ControlFlags::CSTOPB;
+    termios.c_cflag &= !libc::CSTOPB;
 
     // 8 bit words
-    termios.control_flags |= ControlFlags::CS8;
+    termios.c_cflag |= libc::CS8;
 
     // Set baud rate
-    cfsetspeed(&mut termios, rate).unwrap();
-    
-    tcsetattr(file.as_fd(), SetArg::TCSANOW, &termios).expect("Could not set termios");
+    termios.c_cflag &= !(libc::CBAUD | libc::CIBAUD);
+    termios.c_cflag |= libc::BOTHER;
+    termios.c_cflag |= libc::BOTHER << libc::IBSHIFT;
+    termios.c_ospeed = rate;
+    termios.c_ispeed = rate;
+
+    check(unsafe { libc::ioctl(file.as_raw_fd(), libc::TCSETSW2 as _, &termios) })
+        .expect("could not set baud rate");
 }
 
 fn open_tty(device: impl AsRef<Path>, baud_rate: u32) -> fs::File {
@@ -51,7 +84,7 @@ fn open_tty(device: impl AsRef<Path>, baud_rate: u32) -> fs::File {
         .open(device)
         .expect("Could not open serial device");
 
-    set_termios(&mut file, baud_rate.try_into().unwrap());
+    set_termios(&mut file, baud_rate);
 
     return file;
 }
@@ -74,19 +107,20 @@ impl TTY {
 
 impl io::Read for TTY {
     fn read(&mut self, buf: &mut [u8]) -> Result<usize, io::Error> {
-        if !poll(&self.device, POLLIN) {
-            return Err(Errno::ETIMEDOUT.into());
+        if !poll(&self.device, libc::POLLIN)? {
+            return Err(io::ErrorKind::TimedOut.into());
         }
         loop {
-            match read(
-                self.device.as_raw_fd(),
-                buf
-            ){
-                Err(e) => match e {
-                    Errno::EINTR => continue,
-                    _ => return Err(e.into())
-                },
-                Ok(t) => return Ok(t)
+            let result = check_isize(unsafe {
+                libc::read(
+                    self.device.as_raw_fd(),
+                    buf.as_mut_ptr().cast(),
+                    buf.len() as _,
+                )
+            });
+            match result {
+                Err(ref e) if e.raw_os_error() == Some(libc::EINTR) => continue,
+                x => return x,
             }
         }
     }

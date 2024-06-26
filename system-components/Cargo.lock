@@ -249,6 +249,10 @@ dependencies = [
 [[package]]
 name = "keystation"
 version = "0.1.0"
+dependencies = [
+ "rmp",
+ "rs-tty",
+]
 
 [[package]]
 name = "lazy_static"
@@ -400,6 +404,12 @@ dependencies = [
 ]
 
 [[package]]
+name = "paste"
+version = "1.0.15"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "57c0d7b74b563b49d38dae00a0c37d4d6de9b432382b2892f0574ddcae73fd0a"
+
+[[package]]
 name = "patch-loader"
 version = "0.1.0"
 dependencies = [
@@ -440,6 +450,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "rmp"
+version = "0.8.14"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "228ed7c16fa39782c3b3468e974aec2795e9089153cd08ee2e9aefb3613334c4"
+dependencies = [
+ "byteorder",
+ "num-traits",
+ "paste",
+]
+
+[[package]]
 name = "rosc"
 version = "0.10.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -468,6 +489,7 @@ dependencies = [
 name = "rs-tty"
 version = "0.1.0"
 dependencies = [
+ "libc",
  "nix",
 ]
 
@@ -530,6 +552,10 @@ name = "unicode-ident"
 version = "1.0.12"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "3354b9ac3fae1ff6755cb6db53683adb661634f67557942dea4facebec0fee4b"
+
+[[package]]
+name = "updater"
+version = "0.1.0"
 
 [[package]]
 name = "void"

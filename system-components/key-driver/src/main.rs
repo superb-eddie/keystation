@@ -6,11 +6,10 @@ use std::time::Duration;
 
 use midir::{MidiOutput, MidiOutputConnection};
 use midir::os::unix::VirtualOutput;
+
 use rs_tty::TTY;
 
-
 //  TODO: Handle errors more gracefully once code solidifies
-
 
 // TODO: Detect the correct serial device. It shouldn't change, but just in case
 const SERIAL_DEVICE: &str = "/dev/ttyUSB0";
@@ -117,7 +116,6 @@ fn note(key: u8) -> u8 {
     return key + (60 - 24);
 }
 
-
 fn velocity(travel_time: u8) -> u8 {
     // The firmware reports the time between each contact being pressed in whole milliseconds
     // Midi expects some number in [0-127]
@@ -130,7 +128,7 @@ fn velocity(travel_time: u8) -> u8 {
     assert!(velocity <= 127.0);
     assert!(velocity > 0.0);
 
-    return velocity as u8
+    return velocity as u8;
 }
 
 fn note_on(midi_out: &mut MidiOutputConnection, note: u8, velocity: u8) {

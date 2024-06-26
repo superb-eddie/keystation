@@ -5,3 +5,4 @@ edition = "2021"
 
 [dependencies]
 nix = { version = "0.29.0", features = ["poll", "term"] }
+libc = "0.2.155"

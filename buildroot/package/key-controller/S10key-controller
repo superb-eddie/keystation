@@ -14,14 +14,6 @@ log() {
 
 start() {
     "${key_controller_path}" >> "${key_controller_log}" 2>&1 &
-
-    while ! jack_lsp | grep "keystation"; do
-        echo "Waiting for keystation to start..."
-        sleep 0.1
-    done
-
-    jack_connect keystation:midi_out system:midi_playback_1
-#    jack_connect keystation:midi_out Cardinal:events-in
 }
 stop() {
     killall -q "${key_controller_bin}"
