@@ -1,8 +1,7 @@
 // Original code stolen shamelessly from the second popular serial library (but better of the two) `serial2`
 
 use std::{fs, io};
-use std::io::Write;
-use std::os::fd::{AsFd, AsRawFd};
+use std::os::fd::{AsRawFd};
 use std::os::unix::fs::OpenOptionsExt;
 use std::path::Path;
 
@@ -99,10 +98,6 @@ impl TTY {
             device: open_tty(device, baud_rate),
         }
     }
-
-    pub fn flush(&mut self) {
-        self.device.flush().unwrap()
-    }
 }
 
 impl io::Read for TTY {
@@ -123,5 +118,31 @@ impl io::Read for TTY {
                 x => return x,
             }
         }
+    }
+}
+
+impl io::Write for TTY {
+    fn write(&mut self, buf: &[u8]) -> io::Result<usize> {
+        if !poll(&self.device, libc::POLLOUT)? {
+            return Err(io::ErrorKind::TimedOut.into());
+        }
+        unsafe {
+            loop {
+                let result = check_isize(libc::write(
+                    self.device.as_raw_fd(),
+                    buf.as_ptr().cast(),
+                    buf.len() as _,
+                ));
+                match result {
+                    Err(ref e) if e.raw_os_error() == Some(libc::EINTR) => continue,
+                    x => return x,
+                }
+            }
+        }
+    }
+
+    fn flush(&mut self) -> io::Result<()> {
+        check(unsafe { libc::tcdrain(self.device.as_raw_fd()) })?;
+        Ok(())
     }
 }

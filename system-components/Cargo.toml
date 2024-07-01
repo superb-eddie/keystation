@@ -6,4 +6,4 @@ members = [
     "key-driver",
     "keystation",
     "patch-loader"
-, "updater"]
+    , "updater"]

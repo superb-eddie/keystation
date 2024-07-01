@@ -1,6 +1,7 @@
 use std::{env, fs};
 use std::net::UdpSocket;
 use std::path::Path;
+
 use rosc::{encoder, OscMessage, OscPacket, OscType};
 
 const PATCH_DIRECTORY: &'static str = "/usr/share/patches";
@@ -11,9 +12,12 @@ fn send_message(socket: &UdpSocket, addr: impl Into<String>, args: Vec<OscType>)
     let msg_buf = encoder::encode(&OscPacket::Message(OscMessage {
         addr: addr.into(),
         args,
-    })).expect("Can't encode message");
+    }))
+    .expect("Can't encode message");
 
-    socket.send_to(&msg_buf, CARDINAL_ADDRESS).expect("Can't send message");
+    socket
+        .send_to(&msg_buf, CARDINAL_ADDRESS)
+        .expect("Can't send message");
 }
 
 fn recv_message(socket: &UdpSocket, addr: impl Into<String>) -> Vec<OscType> {
@@ -23,9 +27,13 @@ fn recv_message(socket: &UdpSocket, addr: impl Into<String>) -> Vec<OscType> {
             let (_, packet) = rosc::decoder::decode_udp(&buf[..size]).unwrap();
             match packet {
                 OscPacket::Message(msg) => {
-                    assert_eq!(msg.addr, addr.into(), "Address of received message didn't match");
+                    assert_eq!(
+                        msg.addr,
+                        addr.into(),
+                        "Address of received message didn't match"
+                    );
 
-                    return msg.args
+                    return msg.args;
                 }
                 OscPacket::Bundle(_) => {
                     panic!("Received a bundle, not a message!")
@@ -59,5 +67,4 @@ fn main() {
 
     send_message(&sock, "/load", vec![OscType::Blob(patch_contents)]);
     println!("{:?}", recv_message(&sock, "/resp"));
-
 }
