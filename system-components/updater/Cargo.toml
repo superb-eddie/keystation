@@ -6,3 +6,5 @@ edition = "2021"
 [dependencies]
 rmp = "0.8"
 rs-tty = { path = "../rs-tty" }
+nusb = "0.1.9"
+flate2 = "1.0.30"
