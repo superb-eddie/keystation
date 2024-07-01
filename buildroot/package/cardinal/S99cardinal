@@ -28,7 +28,7 @@ start() {
 
     jack_connect keystation:midi_out Cardinal:events-in
 
-    patch-loader key_test
+    patch-loader UnisonAM
 }
 stop() {
     killall -q "${cardinal_bin}"
