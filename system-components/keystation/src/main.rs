@@ -6,7 +6,7 @@ use rmp::{decode, encode};
 
 use rs_tty::TTY;
 
-use flate2::read::GzDecoder;
+use flate2::read::{GzDecoder, ZlibDecoder};
 
 const SERIAL_DEVICE: &str = "/dev/ttyGS1";
 const SERIAL_BAUD: u32 = 115_200;
@@ -22,10 +22,10 @@ fn recv_payload(mut from: impl Read, dest: impl AsRef<Path>) {
         .create(true)
         .open(&dest)
         .unwrap();
-        
-    let mut inflated_payload = GzDecoder::new(from.take(payload_length));
 
-    copy(&mut inflated_payload, &mut dest)
+    let mut uncompressed_payload = ZlibDecoder::new(from).take(payload_length);        
+
+    copy(&mut uncompressed_payload, &mut dest)
         .expect("could not write update payload");
 }
 

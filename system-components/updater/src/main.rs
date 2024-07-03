@@ -1,6 +1,8 @@
 use std::{env, fs};
 use std::io::{copy, Read, Write};
 use std::path::{Path, PathBuf};
+use flate2::Compression;
+use flate2::read::ZlibEncoder;
 
 use rmp::{decode, encode};
 
@@ -21,7 +23,9 @@ fn send_payload(mut to: impl Write, payload_path: impl AsRef<Path>) {
 
     encode::write_u64(&mut to, payload_length).unwrap();
 
-    copy(&mut payload, &mut to).unwrap();
+    let mut compressed_payload = ZlibEncoder::new(payload, Compression::fast());
+
+    copy(&mut compressed_payload, &mut to).unwrap();
 }
 
 fn do_ping(mut serial: &mut TTY) -> bool {
