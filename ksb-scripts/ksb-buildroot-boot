@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+#-NoHelp: Internal
+
+set -euo pipefail
+source "${KSB_SCRIPTS_LIB_DIR}/logging.sh"
+
+qemu="${KSB_BUILDROOT_OUTPUT_DIR}/host/bin/qemu-system-aarch64"
+
+ksb_image="${KSB_IMAGES_DIR}/sdcard.img"
+
+
+$qemu -machine virt -cpu cortex-a72 -smp 6 -m 4G \
+    -drive format=raw,file="${ksb_image}",if=none,id=hd0,cache=writeback \
+    -device virtio-blk,drive=hd0,bootindex=0
