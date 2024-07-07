@@ -9,7 +9,7 @@
     "name": "buildroot",
     "type": "git",
     "url": "git://git.busybox.net/buildroot",
-    "version": "2024.02.2"
+    "version": "2024.05"
   },
   {
     "name": "rustup",

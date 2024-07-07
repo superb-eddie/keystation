@@ -62,5 +62,5 @@ fn main() {
     }
 
     encode::write_str(&mut serial, command).unwrap();
-    send_payload(&mut serial, image_path)
+    // send_payload(&mut serial, image_path)
 }

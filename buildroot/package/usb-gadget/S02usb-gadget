@@ -29,6 +29,12 @@ new_gadget() {
   mkdir -p "${GADGET_CONFIGS_HOME}"
 }
 
+gadget_property() {
+  required "property name" "${1}"
+  required "${1}" "${2}"
+  echo "${2}" > "${GADGET_HOME}/${1}"
+}
+
 gadget_vendor_id() {
   required "vendor id" "${1}"
   echo "${1}" > "${GADGET_HOME}/idVendor"
@@ -52,6 +58,12 @@ gadget_new_function() {
   mkdir -p "${FUNCTION_HOME}"
 }
 
+gadget_function_property() {
+  required "property name" "${1}"
+  required "${1}" "${2}"
+  echo "${2}" > "${FUNCTION_HOME}/${1}"
+}
+
 gadget_new_config() {
   required "config name" "${1}"
 
@@ -73,6 +85,9 @@ gadget_config_function() {
 }
 
 # end config functions
+#unused_root() {
+#
+#}
 
 klog() {
   echo "$1" | tee /dev/kmsg
@@ -81,8 +96,8 @@ klog() {
 # Configure our usb gadget
 configure_gadget() {
   new_gadget "keystation"
-  gadget_vendor_id "0xB3B3"
-  gadget_product_id "0x0420"
+  gadget_property "idVendor" "0xB3B3"
+  gadget_property "idProduct" "0x0420"
   gadget_string "serialnumber" "I am a keyboard :3"
   gadget_string "manufacturer" "Moreland&Moreland Associates"
   gadget_string "product" "Keystation"
@@ -90,9 +105,15 @@ configure_gadget() {
   gadget_new_config "c.1"
   gadget_config_function "midi.usb0"
   # The first acm will run a shell for debugging
-  gadget_config_function "acm.usb1"
+  gadget_config_function "acm.usb0"
   # The second acm will expose a control api
-  gadget_config_function "acm.usb2"
+  gadget_config_function "acm.usb1"
+
+  gadget_config_function "mass_storage.usb0"
+#  The file is left blank. It will be filled when an update is requested
+#  gadget_function_property "lun.0/file" "/dev/mmcblk0p3"
+  gadget_function_property "lun.0/removable" "1"
+  gadget_function_property "lun.0/inquiry_string" "Keystation Root"
 }
 
 # Connect our gadget to the UDC

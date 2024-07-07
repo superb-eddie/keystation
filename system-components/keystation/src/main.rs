@@ -11,6 +11,8 @@ use flate2::read::{GzDecoder, ZlibDecoder};
 const SERIAL_DEVICE: &str = "/dev/ttyGS1";
 const SERIAL_BAUD: u32 = 115_200;
 
+const GADGET_LUN_PATH: &str = "/sys/kernel/config/usb_gadget/keystation/functions/mass_storage.usb0/lun.0/file";
+
 fn recv_payload(mut from: impl Read, dest: impl AsRef<Path>) {
     let payload_length =
         decode::read_u64(&mut from).expect("could not read length of update payload");
@@ -70,14 +72,20 @@ fn main() {
             }
             "update_rootfs" => {
                 let unused_root = unused_rootfs_partition();
-                println!("{}", unused_root.display());
 
-                recv_payload(&mut serial, unused_root);
+                fs::write(GADGET_LUN_PATH, unused_root.to_str().unwrap()).unwrap();
+
+                // println!("{}", unused_root.display());
+                //
+                // recv_payload(&mut serial, unused_root);
             }
             "update_boot" => {
                 let payload_path ="/tmp/boot_update_payload";
                 recv_payload(&mut serial, payload_path);
                 println!("{}", payload_path)
+            }
+            "reboot" => {
+                unimplemented!();
             }
             &_ => {}
         }
