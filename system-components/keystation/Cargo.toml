@@ -7,3 +7,5 @@ edition = "2021"
 rmp = "0.8"
 rs-tty = { path = "../rs-tty" }
 flate2 = "1.0.30"
+anyhow = "1.0.86"
+log = "0.4.22"

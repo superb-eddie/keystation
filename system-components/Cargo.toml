@@ -5,5 +5,6 @@ members = [
     "key-controller",
     "key-driver",
     "keystation",
-    "patch-loader"
-    , "updater"]
+    "patch-loader",
+    "tricorder",
+]

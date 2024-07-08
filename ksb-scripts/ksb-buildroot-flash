@@ -4,14 +4,60 @@
 set -euo pipefail
 source "${KSB_SCRIPTS_LIB_DIR}/logging.sh"
 
-ksb_image="${KSB_IMAGES_DIR}/sdcard.img"
-ksb_device="/dev/sda"
+target="keystation" # (keystation|sdcard)
+device="/dev/disk/by-id/usb-Keystati_on_Root_I_am_a_keyboard_:3-0:0"
+if [[ "${1:-x}" != "x" ]]; then
+  #  If we're given an arg, it's the path to an sdcard
+  target="sdcard"
+  device="${1}"
+fi
 
-read -p "Do you want to write ${ksb_image} to ${ksb_device}? [y/N]: " -n 1 -r
+echo "${target} ${device}"
+
+case "${target}" in
+  "keystation")
+    image="${KSB_BUILDROOT_IMAGES_DIR}/rootfs.ext4"
+  ;;
+  "sdcard")
+    image="${KSB_IMAGES_DIR}/sdcard.img"
+  ;;
+esac
+
+update_keystation() {
+  cargo build --bin tricorder --manifest-path "${KSB_PROJECT_ROOT}/system-components/Cargo.toml"
+  tricorder="${KSB_PROJECT_ROOT}/system-components/target/debug/tricorder"
+
+
+  if ! $tricorder ping; then
+    log_fatal "Couldn't ping keystation"
+  fi
+  log "Starting update"
+
+  $tricorder start_update
+  sudo dd if="${image}" of="${device}" bs=16K status=progress
+
+  if ! $tricorder end_update; then
+    log_fatal "UDC machine broke, try again :("
+  fi
+  log "Update complete! Please wait for restart."
+}
+
+update_sdcard() {
+  sudo dd if="${image}" of="${device}" bs=1M status=progress
+
+  log "Done. Ejecting ${device}"
+  sudo eject "${device}"
+}
+
+read -p "Do you want to write ${image} to ${target} ${device}? [y/N]: " -n 1 -r
 echo
 if [[ $REPLY =~ ^[Yy]$ ]]; then
-    sudo dd if="${ksb_image}" of="${ksb_device}" bs=1M status=progress
-
-    log "Done. Ejecting ${ksb_device}"
-    sudo eject ${ksb_device}
+  case "${target}" in
+    "keystation")
+      update_keystation
+    ;;
+    "sdcard")
+      update_sdcard
+    ;;
+  esac
 fi
