@@ -113,18 +113,30 @@ fn read_next_firmware_message(serial: &mut TTY, mut buffer: [u8; 3]) -> Firmware
 fn note(key: u8) -> u8 {
     // midi middle c = 60
     // keyboard middle c = 24
-    return key + (60 - 24);
+    let midi = 60 + (key - 24);
+    println!("{} {}", key, midi);
+    return midi
 }
 
-fn velocity(travel_time: u8) -> u8 {
+fn linear_curve(t: f32) -> f32 {
+    return t
+}
+
+fn pow_curve(pow: f32) -> impl Fn(f32) -> f32 {
+    move |t: f32| t.powf(pow.clamp(0.0, 10.0))
+}
+
+fn calc_velocity(travel_time: u8, curve: impl FnOnce(f32) -> f32) -> u8 {
     // The firmware reports the time between each contact being pressed in whole milliseconds
     // Midi expects some number in [0-127]
     let min_travel_time = 1.0f32;
-    let max_travel_time = 100.0f32;
+    let max_travel_time = 80.0f32;
 
-    let norm_travel_time = (travel_time as f32).clamp(min_travel_time, max_travel_time);
+    let clamped_travel_time = (travel_time as f32).clamp(min_travel_time, max_travel_time);
 
-    let velocity = 128.0 - ((norm_travel_time / max_travel_time) * 127.0);
+    let norm_travel_time = (clamped_travel_time - min_travel_time) / (max_travel_time - min_travel_time);
+
+    let velocity = 127.0 - (curve(norm_travel_time) * 126.0);
     assert!(velocity <= 127.0);
     assert!(velocity > 0.0);
 
@@ -146,17 +158,8 @@ fn note_off(midi_out: &mut MidiOutputConnection, note: u8) {
     midi_out.send(message).unwrap();
 }
 
-fn main() {
-    println!("Key Driver");
-
-    let expected_firmware_version =
-        fs::read_to_string(FIRMWARE_VERSION).expect("Could not read expected firmware version");
-
-    let mut serial = TTY::open(SERIAL_DEVICE, SERIAL_BAUD);
-    serial.flush();
-
-    let midi_out = MidiOutput::new(MIDI_CLIENT_NAME).unwrap();
-    let mut midi_port = midi_out.create_virtual(MIDI_PORT_NAME).unwrap();
+fn process_firmware_messages(mut serial: TTY, mut midi_port: MidiOutputConnection, expected_firmware_version: String) -> ! {
+    let vel_curve = pow_curve(2.0);
 
     let buffer = [0u8; 3];
     loop {
@@ -173,12 +176,10 @@ fn main() {
                 }
             }
             FirmwareMessage::KeyDown(key, travel_time) => {
-                note_on(&mut midi_port, note(key), velocity(travel_time));
-                // eprintln!("D {} {}", key, velocity);
+                note_on(&mut midi_port, note(key), calc_velocity(travel_time, &vel_curve));
             }
             FirmwareMessage::KeyUp(key) => {
                 note_off(&mut midi_port, note(key));
-                // eprintln!("U {}", key);
             }
             FirmwareMessage::Panic() => {
                 // TODO: Add watchdog to arduino, then we could set a timeout here and wait for it to restart
@@ -186,4 +187,20 @@ fn main() {
             }
         }
     }
+}
+
+fn main() {
+    println!("Key Driver");
+
+    let expected_firmware_version =
+        fs::read_to_string(FIRMWARE_VERSION).expect("Could not read expected firmware version");
+
+    let mut serial = TTY::open(SERIAL_DEVICE, SERIAL_BAUD);
+    serial.flush().expect("Couldn't flush serial port");
+
+    let midi_out = MidiOutput::new(MIDI_CLIENT_NAME).unwrap();
+
+    let firmware_midi_port = midi_out.create_virtual(MIDI_PORT_NAME).unwrap();
+    process_firmware_messages(serial, firmware_midi_port, expected_firmware_version)
+
 }
