@@ -20,7 +20,8 @@ start() {
         sleep 0.1
     done
 
-    jack_connect keystation:midi_out system:midi_playback_1
+    jack_connect keystation_1:midi_out_1 system:midi_playback_1
+    jack_connect keystation_2:midi_out_2 system:midi_playback_1
 #    jack_connect keystation:midi_out Cardinal:events-in
 }
 stop() {

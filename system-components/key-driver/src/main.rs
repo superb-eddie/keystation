@@ -1,4 +1,4 @@
-use std::fs;
+use std::{fs, thread};
 use std::io::{Read, stderr, stdout, Write};
 use std::process::Command;
 use std::thread::sleep;
@@ -6,6 +6,7 @@ use std::time::Duration;
 
 use midir::{MidiOutput, MidiOutputConnection};
 use midir::os::unix::VirtualOutput;
+use rppal::gpio::{Gpio, InputPin, Trigger};
 
 use rs_tty::TTY;
 
@@ -22,11 +23,13 @@ const FIRMWARE_HEADER: &str = "I am a keyboard! :3 ";
 const MIDI_CLIENT_NAME: &str = "keystation";
 const MIDI_PORT_NAME: &str = "midi_out";
 const MIDI_CHANNEL: u8 = 0; // 0-15
-
 const MIDI_NOTE_ON: u8 = 0x90 + MIDI_CHANNEL;
 const MIDI_NOTE_OFF: u8 = 0x80 + MIDI_CHANNEL;
 
-// TODO: Split threads for reading/writing
+const MIDI_CC: u8 = 0xB0 + MIDI_CHANNEL;
+const MIDI_SUSTAIN_PEDAL: u8 = 0x40;
+
+const SUSTAIN_GPIO_PIN: u8 = 20;
 
 fn flash_firmware(serial: TTY) -> TTY {
     // Temporarily take ownership of serial port, so we can drop it to close the file
@@ -115,11 +118,11 @@ fn note(key: u8) -> u8 {
     // keyboard middle c = 24
     let midi = 60 + (key - 24);
     println!("{} {}", key, midi);
-    return midi
+    return midi;
 }
 
 fn linear_curve(t: f32) -> f32 {
-    return t
+    return t;
 }
 
 fn pow_curve(pow: f32) -> impl Fn(f32) -> f32 {
@@ -134,7 +137,8 @@ fn calc_velocity(travel_time: u8, curve: impl FnOnce(f32) -> f32) -> u8 {
 
     let clamped_travel_time = (travel_time as f32).clamp(min_travel_time, max_travel_time);
 
-    let norm_travel_time = (clamped_travel_time - min_travel_time) / (max_travel_time - min_travel_time);
+    let norm_travel_time =
+        (clamped_travel_time - min_travel_time) / (max_travel_time - min_travel_time);
 
     let velocity = 127.0 - (curve(norm_travel_time) * 126.0);
     assert!(velocity <= 127.0);
@@ -158,7 +162,11 @@ fn note_off(midi_out: &mut MidiOutputConnection, note: u8) {
     midi_out.send(message).unwrap();
 }
 
-fn process_firmware_messages(mut serial: TTY, mut midi_port: MidiOutputConnection, expected_firmware_version: String) -> ! {
+fn process_firmware_messages(
+    mut serial: TTY,
+    mut midi_port: MidiOutputConnection,
+    expected_firmware_version: String,
+) -> ! {
     let vel_curve = pow_curve(2.0);
 
     let buffer = [0u8; 3];
@@ -176,7 +184,11 @@ fn process_firmware_messages(mut serial: TTY, mut midi_port: MidiOutputConnectio
                 }
             }
             FirmwareMessage::KeyDown(key, travel_time) => {
-                note_on(&mut midi_port, note(key), calc_velocity(travel_time, &vel_curve));
+                note_on(
+                    &mut midi_port,
+                    note(key),
+                    calc_velocity(travel_time, &vel_curve),
+                );
             }
             FirmwareMessage::KeyUp(key) => {
                 note_off(&mut midi_port, note(key));
@@ -184,6 +196,33 @@ fn process_firmware_messages(mut serial: TTY, mut midi_port: MidiOutputConnectio
             FirmwareMessage::Panic() => {
                 // TODO: Add watchdog to arduino, then we could set a timeout here and wait for it to restart
                 panic!("Arduino panicked!")
+            }
+        }
+    }
+}
+
+fn sustain_on(midi_out: &mut MidiOutputConnection) {
+    println!("sustain on");
+    midi_out.send(&[MIDI_CC, MIDI_SUSTAIN_PEDAL, 0x7F]).unwrap()
+}
+fn sustain_off(midi_out: &mut MidiOutputConnection) {
+    println!("sustain off");
+    midi_out.send(&[MIDI_CC, MIDI_SUSTAIN_PEDAL, 0x00]).unwrap()
+}
+
+fn process_gpio(mut midi_port: MidiOutputConnection, mut sustain_pin: InputPin) -> ! {
+    sustain_pin
+        .set_interrupt(Trigger::Both, Some(Duration::from_millis(1)))
+        .unwrap();
+
+    loop {
+        let interrupt = sustain_pin.poll_interrupt(false, None).unwrap().unwrap();
+
+        match interrupt.trigger {
+            Trigger::RisingEdge => sustain_on(&mut midi_port),
+            Trigger::FallingEdge => sustain_off(&mut midi_port),
+            _ => {
+                panic!("Unexpected trigger type {}", interrupt.trigger)
             }
         }
     }
@@ -198,9 +237,24 @@ fn main() {
     let mut serial = TTY::open(SERIAL_DEVICE, SERIAL_BAUD);
     serial.flush().expect("Couldn't flush serial port");
 
-    let midi_out = MidiOutput::new(MIDI_CLIENT_NAME).unwrap();
+    let sustain_pin = Gpio::new()
+        .unwrap()
+        .get(SUSTAIN_GPIO_PIN)
+        .unwrap()
+        .into_input_pulldown();
 
-    let firmware_midi_port = midi_out.create_virtual(MIDI_PORT_NAME).unwrap();
-    process_firmware_messages(serial, firmware_midi_port, expected_firmware_version)
+    // Process message from the keybed firmware
+    let keybed_midi_port = MidiOutput::new(&format!("{}_2", MIDI_CLIENT_NAME))
+        .unwrap()
+        .create_virtual(&format!("{}_2", MIDI_PORT_NAME))
+        .unwrap();
+    thread::spawn(|| {
+        process_firmware_messages(serial, keybed_midi_port, expected_firmware_version)
+    });
 
+    let gpio_midi_port = MidiOutput::new(&format!("{}_1", MIDI_CLIENT_NAME))
+        .unwrap()
+        .create_virtual(&format!("{}_1", MIDI_PORT_NAME))
+        .unwrap();
+    process_gpio(gpio_midi_port, sustain_pin);
 }

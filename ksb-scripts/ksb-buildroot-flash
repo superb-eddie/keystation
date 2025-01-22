@@ -34,7 +34,8 @@ update_keystation() {
   log "Starting update"
 
   $tricorder start_update
-  sudo dd if="${image}" of="${device}" bs=16K status=progress
+  dd if="${image}" | pv -br | sudo dd of="${device}"
+  sleep 0.1
 
   if ! $tricorder end_update; then
     log_fatal "UDC machine broke, try again :("
