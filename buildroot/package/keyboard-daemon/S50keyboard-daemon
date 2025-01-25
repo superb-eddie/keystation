@@ -1,0 +1,52 @@
+#!/bin/sh
+
+keyboard_daemon_bin="keyboard-daemon"
+keyboard_daemon_path="/usr/bin/${keyboard_daemon_bin}"
+keyboard_daemon_log="/var/log/${keyboard_daemon_bin}.log"
+
+[ -f "${keyboard_daemon_path}" ] || exit 0
+
+umask 077
+
+log() {
+	echo "$1" | tee /dev/kmsg >> "${keyboard_daemon_log}"
+}
+
+start() {
+    "${keyboard_daemon_path}" >> "${keyboard_daemon_log}" 2>&1 &
+
+    while ! jack_lsp | grep "keystation"; do
+        echo "Waiting for keystation to start..."
+        sleep 0.1
+    done
+
+    jack_connect keystation:midi_out system:midi_playback_1
+#    jack_connect keystation:midi_out Cardinal:events-in
+}
+stop() {
+    killall -q "${keyboard_daemon_bin}"
+}
+restart() {
+    stop
+    start
+}
+
+case "$1" in
+  start)
+    log "starting ${keyboard_daemon_bin}"
+    start
+    ;;
+  stop)
+    log "stopping ${keyboard_daemon_bin}"
+    stop
+    ;;
+  restart|reload)
+    log "restarting ${keyboard_daemon_bin}"
+    restart
+    ;;
+  *)
+    echo "Usage: $0 {start|stop|restart}"
+    exit 1
+esac
+
+exit $?

@@ -1,0 +1,18 @@
+[package]
+name = "keyboard-daemon"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+rs-tty = { path = "../rs-tty" }
+
+anyhow = "1.0.95"
+crossbeam = "0.8.4"
+embedded-graphics = "0.8.1"
+tinybmp = "0.6.0"
+
+midir = { version = "0.10.0", default-features = false, features = ["jack"] }
+
+# hardware libraries
+rppal = { version = "0.22.1", features = ["hal"] }
+ssd1306 = "0.8.4" # can't upgrade until buildroot's rust is updagraded TODO: Try upgrading buildroot

@@ -5,7 +5,7 @@ LOADMODULES_INSTALL_TARGET = YES
 
 define LOADMODULES_INSTALL_TARGET_CMDS
 	$(INSTALL) -D -m 755 $(LOADMODULES_PKGDIR)/S01modules $(TARGET_DIR)/etc/init.d/S01modules; \
-	mkdir $(TARGET_DIR)/etc/modules.d;
+	mkdir -p $(TARGET_DIR)/etc/modules.d;
 endef
 
 $(eval $(generic-package))

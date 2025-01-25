@@ -5,5 +5,7 @@ config BR2_PACKAGE_KEYSTATION
 	select BR2_PACKAGE_CARDINAL
 	select BR2_PACKAGE_PATCH_LOADER
 	select BR2_PACKAGE_USB_GADGET
+	select BR2_PACKAGE_UPDATE_DAEMON
+	select BR2_PACKAGE_KEYBOARD_DAEMON
 	help
-	   OS root package, includes "keystation" system daemon
+	   OS root package

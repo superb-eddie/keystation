@@ -1,0 +1,5 @@
+config BR2_PACKAGE_UPDATE_DAEMON
+	bool "update-daemon"
+	select BR2_PACKAGE_USB_GADGET
+	help
+	    System daemon for coordinating updates over USB

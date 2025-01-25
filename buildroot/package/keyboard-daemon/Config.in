@@ -1,15 +1,15 @@
-config BR2_PACKAGE_KEY_DRIVER
-	bool "key-driver"
+config BR2_PACKAGE_KEYBOARD_DAEMON
+	bool "keyboard-daemon"
     depends on BR2_PACKAGE_HOST_RUSTC_TARGET_ARCH_SUPPORTS
 	depends on BR2_PACKAGE_JACK2
     select BR2_PACKAGE_HOST_RUSTC
     select BR2_PACKAGE_KEY_FIRMWARE
     select BR2_PACKAGE_JACK_TOOLS
 	help
-	    Userspace driver for the keyboard
+	    Daemon for all keyboard functions 
 
-comment "key-driver needs rustc with target arch support"
+comment "keyboard-daemon needs rustc with target arch support"
     depends on !BR2_PACKAGE_HOST_RUSTC_TARGET_ARCH_SUPPORTS
 
-comment "key-driver needs jack"
+comment "keyboard-daemon needs jack"
     depends on !BR2_PACKAGE_JACK2

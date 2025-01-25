@@ -2,9 +2,8 @@
 resolver = "2"
 members = [
     "rs-tty",
-    "key-controller",
-    "key-driver",
-    "keystation",
     "patch-loader",
     "tricorder",
+    "update-daemon",
+    "keyboard-daemon"
 ]

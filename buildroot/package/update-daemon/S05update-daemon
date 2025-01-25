@@ -1,0 +1,44 @@
+#!/bin/sh
+
+update_daemon_bin="update-daemon"
+update_daemon_path="/usr/bin/${update_daemon_bin}"
+update_daemon_log="/var/log/${update_daemon_bin}.log"
+
+[ -x "${update_daemon_path}" ] || exit 0
+
+umask 077
+
+log() {
+	echo "$1" | tee /dev/kmsg >> "${update_daemon_log}"
+}
+
+start() {
+    "${update_daemon_path}"  >> "${update_daemon_log}" 2>&1 &
+}
+stop() {
+    killall -q "${update_daemon_bin}"
+}
+restart() {
+    stop
+    start
+}
+
+case "$1" in
+  start)
+    log "starting ${update_daemon_bin}"
+    start
+    ;;
+  stop)
+    log "stopping ${update_daemon_bin}"
+    stop
+    ;;
+  restart|reload)
+    log "restarting ${update_daemon_bin}"
+    restart
+    ;;
+  *)
+    echo "Usage: $0 {start|stop|restart}"
+    exit 1
+esac
+
+exit $?
