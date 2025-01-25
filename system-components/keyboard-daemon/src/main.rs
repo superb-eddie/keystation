@@ -1,7 +1,8 @@
 use crate::gpio_driver::start_gpio_driver;
 use crate::keybed_driver::start_keybed_driver;
 use crate::midi_sender::start_midi_sender;
-use crate::user_interface::start_user_interface;
+use crate::user_interface::{start_user_interface, UIEvent};
+use crate::user_interface::Button::DpadCenter;
 
 mod gpio_driver;
 mod keybed_driver;
@@ -11,13 +12,15 @@ mod user_interface;
 fn main() -> anyhow::Result<()> {
     let mut thread_handles = vec![];
 
-    let ui_thread = start_user_interface()?;
+    let (ui_thread, ui_channel) = start_user_interface()?;
     thread_handles.push(ui_thread);
+
+    ui_channel.send(UIEvent::Down(DpadCenter))?;
 
     let (midi_thread, midi_channel) = start_midi_sender()?;
     thread_handles.push(midi_thread);
 
-    let gpio_thread = start_gpio_driver(midi_channel.clone())?;
+    let gpio_thread = start_gpio_driver(midi_channel.clone(), ui_channel.clone())?;
     thread_handles.push(gpio_thread);
 
     let keybed_thread = start_keybed_driver(midi_channel.clone())?;
