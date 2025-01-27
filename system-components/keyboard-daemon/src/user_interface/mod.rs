@@ -1,3 +1,5 @@
+use std::error::Error;
+use std::fmt::Debug;
 use std::thread;
 use std::thread::{JoinHandle, sleep};
 use std::time::{Duration, Instant};
@@ -9,16 +11,21 @@ use embedded_graphics::prelude::*;
 use embedded_graphics::primitives::{
     Circle, PrimitiveStyle, PrimitiveStyleBuilder, Rectangle, StyledDrawable, Triangle,
 };
-use rppal::i2c::I2c;
-use ssd1306::{I2CDisplayInterface, Ssd1306};
-use ssd1306::mode::BufferedGraphicsMode;
-use ssd1306::prelude::*;
 use tinybmp::Bmp;
+
+use crate::user_interface::display::Display;
+use crate::user_interface::display_impl::new_display;
+
+mod display;
+
+#[cfg_attr(not(feature = "simulator"), path = "display_real.rs")]
+#[cfg_attr(feature = "simulator", path = "display_fake.rs")]
+mod display_impl;
 
 const SCREEN_WIDTH: f32 = 128.0;
 const SCREEN_HEIGHT: f32 = 64.0;
 
-const KEYSTATION_SCROLL_BMP: &[u8] = include_bytes!("../assets/keystation_scroll.bmp");
+const KEYSTATION_SCROLL_BMP: &[u8] = include_bytes!("assets/keystation_scroll.bmp");
 
 pub enum Button {
     DpadUp,
@@ -39,12 +46,7 @@ pub enum UIEvent {
 }
 
 pub fn start_user_interface() -> anyhow::Result<(JoinHandle<()>, Sender<UIEvent>)> {
-    let i2c = I2c::new()?;
-
-    let interface = I2CDisplayInterface::new(i2c);
-    let mut display = Ssd1306::new(interface, DisplaySize128x64, DisplayRotation::Rotate0)
-        .into_buffered_graphics_mode();
-    display.init().expect("Couldn't init display");
+    let mut display = new_display();
 
     let keystation_scroll = Bmp::from_slice(KEYSTATION_SCROLL_BMP).expect("couldn't load scroll");
 
@@ -107,8 +109,7 @@ impl UIState {
     }
 }
 
-fn ui_renderer<'a, DI: WriteOnlyDataCommand, SIZE: DisplaySize>(
-) -> impl FnMut(&mut Ssd1306<DI, SIZE, BufferedGraphicsMode<SIZE>>, &UIState) + 'a {
+fn ui_renderer<'a, D: Display>() -> impl FnMut(&mut D, &UIState) + 'a {
     let style_outline = PrimitiveStyleBuilder::new()
         .stroke_color(BinaryColor::On)
         .stroke_width(1)
@@ -164,10 +165,7 @@ fn ui_renderer<'a, DI: WriteOnlyDataCommand, SIZE: DisplaySize>(
     }
 }
 
-fn do_ui<DI: WriteOnlyDataCommand, SIZE: DisplaySize>(
-    display: &mut Ssd1306<DI, SIZE, BufferedGraphicsMode<SIZE>>,
-    event_channel: Receiver<UIEvent>,
-) {
+fn do_ui<D: Display>(display: &mut D, event_channel: Receiver<UIEvent>) {
     let mut state = UIState::new();
 
     let mut render = ui_renderer();
@@ -181,10 +179,7 @@ fn do_ui<DI: WriteOnlyDataCommand, SIZE: DisplaySize>(
     }
 }
 
-fn do_logo_scroll<DI: WriteOnlyDataCommand, SIZE: DisplaySize>(
-    display: &mut Ssd1306<DI, SIZE, BufferedGraphicsMode<SIZE>>,
-    logo: Bmp<BinaryColor>,
-) {
+fn do_logo_scroll<D: Display>(display: &mut D, logo: Bmp<BinaryColor>) {
     let fps = 10f32;
 
     let animation_duration = 4f32;
