@@ -1,8 +1,7 @@
 use std::thread::sleep;
 use std::time::{Duration, Instant};
 
-use crate::user_interface::display::Display;
-use crate::user_interface::display_impl::new_display;
+use crate::display::Display;
 use crossbeam::channel::{select_biased, tick, Receiver};
 use embedded_graphics::image::Image;
 use embedded_graphics::pixelcolor::BinaryColor;
@@ -15,7 +14,7 @@ use tinybmp::Bmp;
 const SCREEN_WIDTH: f32 = 128.0;
 const SCREEN_HEIGHT: f32 = 64.0;
 
-const KEYSTATION_SCROLL_BMP: &[u8] = include_bytes!("assets/keystation_scroll.bmp");
+const KEYSTATION_SCROLL_BMP: &[u8] = include_bytes!("../assets/keystation_scroll.bmp");
 
 pub enum Button {
     DpadUp,
@@ -35,11 +34,8 @@ pub enum UIEvent {
     Up(Button),
 }
 
-pub fn start_user_interface(ui_channel: Receiver<UIEvent>) -> ! {
+pub fn start_user_interface(mut display: impl Display, ui_channel: Receiver<UIEvent>) -> ! {
     let keystation_scroll = Bmp::from_slice(KEYSTATION_SCROLL_BMP).expect("couldn't load scroll");
-
-    let mut display = new_display();
-    println!("Display initialized");
 
     do_logo_scroll(&mut display, keystation_scroll);
     do_ui(&mut display, ui_channel);

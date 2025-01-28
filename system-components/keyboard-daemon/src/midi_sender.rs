@@ -21,9 +21,7 @@ pub enum MidiEvent {
 
 // Start a new thread to send midi events to the OS
 pub fn start_midi_sink(midi_channel: Receiver<MidiEvent>) -> anyhow::Result<()> {
-    let mut midi_out = MidiOutput::new(MIDI_CLIENT_NAME)?
-        .create_virtual(MIDI_PORT_NAME)
-        .unwrap();
+    let mut midi_out = MidiOutput::new(MIDI_CLIENT_NAME)?.create_virtual(MIDI_PORT_NAME)?;
 
     thread::spawn(move || {
         for e in midi_channel {

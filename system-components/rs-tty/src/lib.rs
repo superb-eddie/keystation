@@ -1,9 +1,9 @@
 // Original code stolen shamelessly from the second popular serial library (but better of the two) `serial2`
 
-use std::{fs, io};
 use std::os::fd::AsRawFd;
 use std::os::unix::fs::OpenOptionsExt;
 use std::path::Path;
+use std::{fs, io};
 
 use nix::libc::{O_NOCTTY, O_NONBLOCK};
 

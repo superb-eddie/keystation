@@ -1,5 +1,6 @@
 use std::fmt::Debug;
 
+use crate::display::Display;
 use anyhow::anyhow;
 use embedded_graphics::pixelcolor::BinaryColor;
 use embedded_graphics::prelude::*;
@@ -8,8 +9,6 @@ use rppal::i2c::I2c;
 use ssd1306::mode::BufferedGraphicsMode;
 use ssd1306::prelude::*;
 use ssd1306::{I2CDisplayInterface, Ssd1306};
-
-use crate::user_interface::display::Display;
 
 pub fn new_display() -> impl Display {
     RealDisplay::new()

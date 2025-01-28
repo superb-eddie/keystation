@@ -1,5 +1,5 @@
 use std::fs;
-use std::io::{Read, stderr, stdout};
+use std::io::{stderr, stdout, Read};
 use std::path::PathBuf;
 use std::process::Command;
 
@@ -20,11 +20,11 @@ const GADGET_LUN_PATH: &str =
 const CMDLINE_PATH: &'static str = "/boot/cmdline.txt";
 
 fn parse_cmdline_root(kernel_cmdline: &str) -> Option<&str> {
-    return  kernel_cmdline
+    return kernel_cmdline
         .split(" ")
         .find(|option| option.starts_with("root="))
         .and_then(|root_options| root_options.split_once("="))
-        .and_then(|(_, root)| Some(root))
+        .and_then(|(_, root)| Some(root));
 }
 
 fn current_rootfs_partition() -> Result<PathBuf> {
@@ -47,7 +47,8 @@ fn unused_rootfs_partition() -> Result<PathBuf> {
 
 fn set_rootfs_partition(new_rootfs: &str) -> Result<()> {
     let kernel_cmdline = fs::read_to_string(CMDLINE_PATH)?;
-    let root_option = parse_cmdline_root(&kernel_cmdline).ok_or(anyhow!("Couldn't get root option"))?;
+    let root_option =
+        parse_cmdline_root(&kernel_cmdline).ok_or(anyhow!("Couldn't get root option"))?;
 
     let new_cmdline = kernel_cmdline.replace(root_option, &new_rootfs);
     fs::write(CMDLINE_PATH, new_cmdline)?;
@@ -84,7 +85,7 @@ fn main() {
                 drop(serial);
                 serial = TTY::open(SERIAL_DEVICE, SERIAL_BAUD);
 
-                continue
+                continue;
             }
             Ok(c) => {
                 println!("{}", c);
@@ -93,7 +94,8 @@ fn main() {
         };
 
         match do_cmd(command.to_owned(), |resp| {
-            encode::write_str(&mut serial, resp)?; Ok(())
+            encode::write_str(&mut serial, resp)?;
+            Ok(())
         }) {
             Err(e) => {
                 eprintln!("Error running cmd; {}", e);
@@ -105,9 +107,7 @@ fn main() {
 
 fn do_cmd(command: String, resp: impl FnOnce(&str) -> Result<()>) -> Result<()> {
     match command.as_str() {
-        "ping" => {
-            resp("pong")
-        }
+        "ping" => resp("pong"),
         "start_update" => {
             // "insert" partition
             let unused_root = unused_rootfs_partition()?;
@@ -116,7 +116,7 @@ fn do_cmd(command: String, resp: impl FnOnce(&str) -> Result<()>) -> Result<()> 
             resp("ok")
         }
         "end_update" => {
-            // "remove" partition 
+            // "remove" partition
             fs::write(GADGET_LUN_PATH, "")?;
 
             // Swap roots
@@ -130,8 +130,6 @@ fn do_cmd(command: String, resp: impl FnOnce(&str) -> Result<()>) -> Result<()> 
 
             Ok(())
         }
-        &_ => {
-            resp("unknown cmd")
-        }
+        &_ => resp("unknown cmd"),
     }
 }
