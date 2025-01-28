@@ -127,6 +127,7 @@ fn send_input_event(
     down: bool,
 ) -> anyhow::Result<()> {
     match keycode {
+        // Display keys
         Keycode::Slash => ui_event(ui_channel, down, Button::DpadDown),
         Keycode::P => ui_event(ui_channel, down, Button::DpadUp),
         Keycode::L => ui_event(ui_channel, down, Button::DpadLeft),
@@ -134,6 +135,19 @@ fn send_input_event(
         Keycode::Semicolon => ui_event(ui_channel, down, Button::DpadCenter),
         Keycode::O => ui_event(ui_channel, down, Button::A),
         Keycode::LeftBracket => ui_event(ui_channel, down, Button::B),
+
+        // Keyboard keys
+        Keycode::A => midi_event(midi_channel, down, 48),
+        Keycode::W => midi_event(midi_channel, down, 49),
+        Keycode::S => midi_event(midi_channel, down, 50),
+        Keycode::E => midi_event(midi_channel, down, 51),
+        Keycode::D => midi_event(midi_channel, down, 52),
+        Keycode::F => midi_event(midi_channel, down, 53),
+        Keycode::T => midi_event(midi_channel, down, 54),
+        Keycode::G => midi_event(midi_channel, down, 55),
+        Keycode::Y => midi_event(midi_channel, down, 56),
+        Keycode::H => midi_event(midi_channel, down, 57),
+
         _ => Ok(()),
     }
 }
@@ -143,6 +157,21 @@ fn ui_event(ui_channel: &Sender<UIEvent>, down: bool, button: Button) -> anyhow:
         UIEvent::Down(button)
     } else {
         UIEvent::Up(button)
+    })?;
+
+    Ok(())
+}
+
+fn midi_event(midi_channel: &Sender<MidiEvent>, down: bool, pitch: u8) -> anyhow::Result<()> {
+    midi_channel.send(if down {
+       MidiEvent::NoteOn {
+           note: pitch,
+           velocity: 127/2,
+       } 
+    } else {
+       MidiEvent::NoteOff {
+           note: pitch,
+       } 
     })?;
 
     Ok(())
