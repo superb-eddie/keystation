@@ -1,56 +1,58 @@
-use std::thread::JoinHandle;
+#[cfg(all(feature = "keyboard", feature = "simulator"))]
+compile_error!("can't build for keyboard and simulator at the same time");
 
-use crossbeam::channel::Sender;
+use crossbeam::channel::{unbounded, Sender};
+use std::thread;
+use std::time::Duration;
 
-use crate::midi_sender::{MidiEvent, start_midi_sender};
+use crate::midi_sender::{start_midi_sink, MidiEvent};
+use crate::user_interface::Button::DpadCenter;
 use crate::user_interface::{start_user_interface, UIEvent};
 
-#[cfg(not(feature = "simulator"))]
+#[cfg(feature = "keyboard")]
 mod gpio_driver;
-#[cfg(not(feature = "simulator"))]
+#[cfg(feature = "keyboard")]
 mod keybed_driver;
 mod midi_sender;
 mod user_interface;
 
-#[cfg(not(feature = "simulator"))]
+#[cfg(feature = "keyboard")]
 fn start_input_drivers(
-    thread_handles: &mut Vec<JoinHandle<()>>,
     midi_channel: Sender<MidiEvent>,
     ui_channel: Sender<UIEvent>,
 ) -> anyhow::Result<()> {
     use crate::gpio_driver::start_gpio_driver;
     use crate::keybed_driver::start_keybed_driver;
 
-    let gpio_thread = start_gpio_driver(midi_channel.clone(), ui_channel.clone())?;
-    thread_handles.push(gpio_thread);
+    start_gpio_driver(midi_channel.clone(), ui_channel.clone())?;
 
-    let keybed_thread = start_keybed_driver(midi_channel.clone())?;
-    thread_handles.push(keybed_thread);
+    start_keybed_driver(midi_channel.clone())?;
 
     Ok(())
 }
 
 #[cfg(feature = "simulator")]
 fn start_input_drivers(
-    thread_handles: &mut Vec<JoinHandle<()>>,
     midi_channel: Sender<MidiEvent>,
     ui_channel: Sender<UIEvent>,
 ) -> anyhow::Result<()> {
+    thread::spawn(move || loop {
+        ui_channel.send(UIEvent::Down(DpadCenter)).unwrap();
+        thread::sleep(Duration::from_secs_f32(0.5));
+        ui_channel.send(UIEvent::Up(DpadCenter)).unwrap();
+        thread::sleep(Duration::from_secs_f32(0.5));
+    });
+
     Ok(())
 }
 
 fn main() -> anyhow::Result<()> {
-    let mut thread_handles = vec![];
+    let (midi_sender, midi_receiver) = unbounded();
+    let (ui_sender, ui_receiver) = unbounded();
 
-    let (ui_thread, ui_channel) = start_user_interface()?;
-    thread_handles.push(ui_thread);
+    start_midi_sink(midi_receiver)?;
 
-    let (midi_thread, midi_channel) = start_midi_sender()?;
-    thread_handles.push(midi_thread);
+    start_input_drivers(midi_sender, ui_sender)?;
 
-    for thread_handle in thread_handles.drain(..) {
-        thread_handle.join().unwrap();
-    }
-
-    Ok(())
+    start_user_interface(ui_receiver);
 }

@@ -7,7 +7,6 @@ edition = "2021"
 # RPI triple: aarch64-unknown-linux-gnu
 
 [dependencies]
-rs-tty = { path = "../rs-tty" }
 
 anyhow = "1.0.95"
 crossbeam = "0.8.4"
@@ -20,6 +19,7 @@ midir = { version = "0.10.0", default-features = false }
 embedded-graphics-simulator = { version = "0.7.0", optional = true }
 
 # keyboard deps
+rs-tty = { path = "../rs-tty", optional = true }
 rppal = { version = "0.22.1", features = ["hal"], optional = true }
 ssd1306 = { version = "0.8.4", optional = true } # can't upgrade until buildroot's rust is updagraded TODO: Try upgrading buildroot
 
@@ -28,7 +28,8 @@ default = ["keyboard"]
 keyboard = [
     "midir/jack",
     "rppal",
-    "ssd1306"
+    "ssd1306",
+    "rs-tty"
 ]
 simulator = [
     "embedded-graphics-simulator"

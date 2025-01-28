@@ -1,8 +1,7 @@
-use std::thread;
-
-use crossbeam::channel::{Sender, unbounded};
-use midir::MidiOutput;
+use crossbeam::channel::Receiver;
 use midir::os::unix::VirtualOutput;
+use midir::MidiOutput;
+use std::thread;
 
 const MIDI_CLIENT_NAME: &str = "keystation";
 const MIDI_PORT_NAME: &str = "midi_out";
@@ -21,15 +20,13 @@ pub enum MidiEvent {
 }
 
 // Start a new thread to send midi events to the OS
-pub fn start_midi_sender() -> anyhow::Result<(thread::JoinHandle<()>, Sender<MidiEvent>)> {
-    let (s, r) = unbounded();
-
+pub fn start_midi_sink(midi_channel: Receiver<MidiEvent>) -> anyhow::Result<()> {
     let mut midi_out = MidiOutput::new(MIDI_CLIENT_NAME)?
         .create_virtual(MIDI_PORT_NAME)
         .unwrap();
 
-    let join_handle = thread::spawn(move || {
-        for e in r {
+    thread::spawn(move || {
+        for e in midi_channel {
             let message = match e {
                 MidiEvent::NoteOn { note, velocity } => {
                     [MIDI_NOTE_ON, note.min(127), velocity.min(127)]
@@ -43,5 +40,5 @@ pub fn start_midi_sender() -> anyhow::Result<(thread::JoinHandle<()>, Sender<Mid
         }
     });
 
-    return Ok((join_handle, s));
+    Ok(())
 }
