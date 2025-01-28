@@ -2,6 +2,7 @@ use std::thread;
 use std::time::Duration;
 
 use crossbeam::channel::Sender;
+use midly::num::u7;
 use rppal::gpio::{Event, Gpio, Trigger};
 
 use crate::midi_sender::MidiEvent;
@@ -67,13 +68,7 @@ pub fn start_gpio_driver(
                 A_GPIO_PIN => send_button_event(&ui_channel, interrupt, Button::A),
                 B_GPIO_PIN => send_button_event(&ui_channel, interrupt, Button::B),
                 SUSTAIN_GPIO_PIN => {
-                    midi_channel
-                        .try_send(match interrupt.trigger {
-                            Trigger::RisingEdge => MidiEvent::SustainOn,
-                            Trigger::FallingEdge => MidiEvent::SustainOff,
-                            _ => break,
-                        })
-                        .expect("couldn't send midi event");
+                    send_sustain_event(&midi_channel, interrupt)
                 }
                 _ => {}
             }
@@ -91,4 +86,20 @@ fn send_button_event(ui_channel: &Sender<UIEvent>, interrupt: Event, button: But
             _ => return,
         })
         .expect("couldn't send ui event");
+}
+
+fn send_sustain_event(midi_channel: &Sender<MidiEvent>, interrupt: Event) {
+    midi_channel
+        .try_send(match interrupt.trigger {
+            Trigger::RisingEdge => MidiEvent::Controller {
+                controller: u7::new(0x40),
+                value: u7::max_value(),
+            },
+            Trigger::FallingEdge => MidiEvent::Controller {
+                controller: u7::new(0x40),
+                value: u7::default(),
+            },
+            _ => return,
+        })
+        .expect("couldn't send midi event");
 }

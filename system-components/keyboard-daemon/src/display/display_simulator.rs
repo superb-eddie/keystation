@@ -13,6 +13,7 @@ use embedded_graphics_simulator::{
     BinaryColorTheme, OutputSettingsBuilder, SimulatorDisplay, SimulatorEvent, Window,
 };
 use std::process::exit;
+use midly::num::u7;
 
 pub fn new_display() -> impl Display {
     FakeDisplay::new()
@@ -137,16 +138,18 @@ fn send_input_event(
         Keycode::LeftBracket => ui_event(ui_channel, down, Button::B),
 
         // Keyboard keys
-        Keycode::A => midi_event(midi_channel, down, 48),
-        Keycode::W => midi_event(midi_channel, down, 49),
-        Keycode::S => midi_event(midi_channel, down, 50),
-        Keycode::E => midi_event(midi_channel, down, 51),
-        Keycode::D => midi_event(midi_channel, down, 52),
-        Keycode::F => midi_event(midi_channel, down, 53),
-        Keycode::T => midi_event(midi_channel, down, 54),
-        Keycode::G => midi_event(midi_channel, down, 55),
-        Keycode::Y => midi_event(midi_channel, down, 56),
-        Keycode::H => midi_event(midi_channel, down, 57),
+        Keycode::A => midi_key_event(midi_channel, down, 48),
+        Keycode::W => midi_key_event(midi_channel, down, 49),
+        Keycode::S => midi_key_event(midi_channel, down, 50),
+        Keycode::E => midi_key_event(midi_channel, down, 51),
+        Keycode::D => midi_key_event(midi_channel, down, 52),
+        Keycode::F => midi_key_event(midi_channel, down, 53),
+        Keycode::T => midi_key_event(midi_channel, down, 54),
+        Keycode::G => midi_key_event(midi_channel, down, 55),
+        Keycode::Y => midi_key_event(midi_channel, down, 56),
+        Keycode::H => midi_key_event(midi_channel, down, 57),
+
+        Keycode::Space => midi_sustain_event(midi_channel, down),
 
         _ => Ok(()),
     }
@@ -162,16 +165,33 @@ fn ui_event(ui_channel: &Sender<UIEvent>, down: bool, button: Button) -> anyhow:
     Ok(())
 }
 
-fn midi_event(midi_channel: &Sender<MidiEvent>, down: bool, pitch: u8) -> anyhow::Result<()> {
+fn midi_key_event(midi_channel: &Sender<MidiEvent>, down: bool, pitch: u8) -> anyhow::Result<()> {
     midi_channel.send(if down {
        MidiEvent::NoteOn {
-           note: pitch,
-           velocity: 127/2,
-       } 
+           key: u7::new(pitch),
+           vel: u7::new(127/2)
+       }
     } else {
-       MidiEvent::NoteOff {
-           note: pitch,
-       } 
+        MidiEvent::NoteOff {
+            key: u7::new(pitch),
+            vel: Default::default(),
+        }
+    })?;
+
+    Ok(())
+}
+
+fn midi_sustain_event(midi_channel: &Sender<MidiEvent>, down: bool) -> anyhow::Result<()> {
+    midi_channel.send(if down {
+        MidiEvent::Controller {
+            controller: u7::new(0x40),
+            value: u7::max_value(),
+        }
+    } else {
+        MidiEvent::Controller {
+            controller: u7::new(0x40),
+            value: u7::default(),
+        }
     })?;
 
     Ok(())
