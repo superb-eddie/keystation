@@ -1,8 +1,7 @@
 use std::thread::sleep;
 use std::time::{Duration, Instant};
 
-use crate::display::Display;
-use crossbeam::channel::{select_biased, tick, Receiver};
+use crossbeam::channel::{Receiver, select_biased, tick};
 use embedded_graphics::image::Image;
 use embedded_graphics::pixelcolor::BinaryColor;
 use embedded_graphics::prelude::*;
@@ -10,6 +9,8 @@ use embedded_graphics::primitives::{
     Circle, PrimitiveStyle, PrimitiveStyleBuilder, Rectangle, StyledDrawable, Triangle,
 };
 use tinybmp::Bmp;
+
+use crate::display::Display;
 
 const SCREEN_WIDTH: f32 = 128.0;
 const SCREEN_HEIGHT: f32 = 64.0;

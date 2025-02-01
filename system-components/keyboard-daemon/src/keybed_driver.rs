@@ -1,15 +1,16 @@
-use std::io::{stderr, stdout, Read, Write};
+use std::{fs, thread};
+use std::io::{Read, stderr, stdout, Write};
 use std::process::Command;
 use std::thread::sleep;
 use std::time::Duration;
-use std::{fs, thread};
 
 use crossbeam::channel::Sender;
+use midly::MidiMessage::{NoteOff, NoteOn};
+use midly::num::u7;
 
 use rs_tty::TTY;
 
 use crate::midi_sender::MidiEvent;
-use crate::midi_sender::MidiEvent::{NoteOff, NoteOn};
 
 const SERIAL_DEVICE: &str = "/dev/ttyUSB0";
 const SERIAL_BAUD: u32 = 115_200;
@@ -45,14 +46,17 @@ pub fn start_keybed_driver(midi_channel: Sender<MidiEvent>) -> anyhow::Result<()
                 FirmwareMessage::KeyDown(key, travel_time) => {
                     midi_channel
                         .try_send(NoteOn {
-                            note: note(key),
-                            velocity: calc_velocity(travel_time, &vel_curve),
+                            key: u7::new(note(key)),
+                            vel: u7::new(calc_velocity(travel_time, &vel_curve)),
                         })
                         .expect("couldn't send midi event");
                 }
                 FirmwareMessage::KeyUp(key) => {
                     midi_channel
-                        .try_send(NoteOff { note: note(key) })
+                        .try_send(NoteOff {
+                            key: u7::new(note(key)),
+                            vel: Default::default(),
+                        })
                         .expect("couldn't send midi event");
                 }
                 FirmwareMessage::Panic() => {

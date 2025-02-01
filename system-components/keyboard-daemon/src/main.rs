@@ -1,18 +1,19 @@
-#[cfg(all(feature = "keyboard", feature = "simulator"))]
-compile_error!("can't build for keyboard and simulator at the same time");
-
-use crate::display::new_display;
-use crate::display::Display;
-use crate::midi_sender::start_midi_sink;
-use crate::user_interface::start_user_interface;
-use crossbeam::channel::unbounded;
-
-#[cfg(feature = "keyboard")]
-use crate::midi_sender::MidiEvent;
-#[cfg(feature = "keyboard")]
-use crate::user_interface::UIEvent;
 #[cfg(feature = "keyboard")]
 use crossbeam::channel::Sender;
+use crossbeam::channel::unbounded;
+
+#[cfg(feature = "simulator")]
+use crate::display::Display;
+use crate::display::new_display;
+#[cfg(feature = "keyboard")]
+use crate::midi_sender::MidiEvent;
+use crate::midi_sender::start_midi_sink;
+use crate::user_interface::start_user_interface;
+#[cfg(feature = "keyboard")]
+use crate::user_interface::UIEvent;
+
+#[cfg(all(feature = "keyboard", feature = "simulator"))]
+compile_error!("can't build for keyboard and simulator at the same time");
 
 mod display;
 #[cfg(feature = "keyboard")]
@@ -37,24 +38,31 @@ fn start_input_drivers(
     Ok(())
 }
 
+// TODO: more structured thread management
+
+// TODO: CI for both build targets
+
 fn main() -> anyhow::Result<()> {
     let (midi_sender, midi_receiver) = unbounded();
     let (ui_sender, ui_receiver) = unbounded();
 
     start_midi_sink(midi_receiver)?;
+    println!("Midi initialized");
 
-    #[cfg(feature = "keyboard")]
-    {
-        start_input_drivers(midi_sender.clone(), ui_sender.clone())?;
-    }
-
-    let mut display = new_display();
-    println!("Display initialized");
-
-    #[cfg(feature = "simulator")]
-    {
-        display.start_input_drivers(midi_sender.clone(), ui_sender.clone())?;
-    }
+    let display = {
+        #[cfg(feature = "simulator")]
+        {
+            let mut display = new_display();
+            display.start_input_drivers(midi_sender.clone(), ui_sender.clone())?;
+            display
+        }
+        #[cfg(feature = "keyboard")]
+        {
+            start_input_drivers(midi_sender.clone(), ui_sender.clone())?;
+            new_display()
+        }
+    };
+    println!("Input and Display initialized");
 
     start_user_interface(display, ui_receiver);
 }

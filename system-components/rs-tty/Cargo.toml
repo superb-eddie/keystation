@@ -2,6 +2,7 @@
 name = "rs-tty"
 version = "0.1.0"
 edition = "2021"
+rust-version = "1.74.1"
 
 [dependencies]
 nix = { version = "0.29.0", features = ["poll", "term"] }

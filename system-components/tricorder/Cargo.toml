@@ -2,6 +2,7 @@
 name = "tricorder"
 version = "0.1.0"
 edition = "2021"
+rust-version = "1.74.1"
 
 [dependencies]
 rmp = "0.8"

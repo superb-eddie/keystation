@@ -1,9 +1,7 @@
+#[cfg(feature = "simulator")]
+use crossbeam::channel::Sender;
 use embedded_graphics::pixelcolor::BinaryColor;
 use embedded_graphics::prelude::*;
-
-#[cfg_attr(feature = "keyboard", path = "display_keyboard.rs")]
-#[cfg_attr(feature = "simulator", path = "display_simulator.rs")]
-mod display_impl;
 
 pub use display_impl::*;
 
@@ -11,8 +9,10 @@ pub use display_impl::*;
 use crate::midi_sender::MidiEvent;
 #[cfg(feature = "simulator")]
 use crate::user_interface::UIEvent;
-#[cfg(feature = "simulator")]
-use crossbeam::channel::Sender;
+
+#[cfg_attr(feature = "keyboard", path = "display_keyboard.rs")]
+#[cfg_attr(feature = "simulator", path = "display_simulator.rs")]
+mod display_impl;
 
 pub trait Display: DrawTarget<Color = BinaryColor, Error = anyhow::Error> {
     fn clear_buffer(&mut self);

@@ -1,13 +1,12 @@
 use std::fs;
-use std::io::{stderr, stdout, Read};
+use std::io::{Read, stderr, stdout};
 use std::path::PathBuf;
 use std::process::Command;
 
+use anyhow::{anyhow, bail, Result};
 use rmp::{decode, encode};
 
 use rs_tty::TTY;
-
-use anyhow::{anyhow, bail, Result};
 
 const SERIAL_DEVICE: &str = "/dev/ttyGS1";
 const SERIAL_BAUD: u32 = 115_200;

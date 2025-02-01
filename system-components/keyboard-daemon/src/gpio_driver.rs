@@ -67,9 +67,7 @@ pub fn start_gpio_driver(
                 DPAD_C_GPIO_PIN => send_button_event(&ui_channel, interrupt, Button::DpadCenter),
                 A_GPIO_PIN => send_button_event(&ui_channel, interrupt, Button::A),
                 B_GPIO_PIN => send_button_event(&ui_channel, interrupt, Button::B),
-                SUSTAIN_GPIO_PIN => {
-                    send_sustain_event(&midi_channel, interrupt)
-                }
+                SUSTAIN_GPIO_PIN => send_sustain_event(&midi_channel, interrupt),
                 _ => {}
             }
         }

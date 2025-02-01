@@ -2,6 +2,7 @@
 name = "keyboard-daemon"
 version = "0.1.0"
 edition = "2021"
+rust-version = "1.74.1"
 
 
 # RPI triple: aarch64-unknown-linux-gnu

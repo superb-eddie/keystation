@@ -10,6 +10,10 @@ export RUSTUP_HOME="${ksb_cargo_home}"
 export CARGO_HOME="${ksb_cargo_home}"
 export CARGO_TARGET_DIR="${KSB_BUILD_DIR}/cargo-target"
 
+# This version should match the toolchain used by the firmware
+# as defined in: key-firmware/rust-toolchain.toml
+DEFAULT_RUST_TOOLCHAIN="nightly-2024-03-22"
+
 if [[ ! -d "${ksb_cargo_home}" ]]; then
   log_section "Installing cargo"
 
@@ -20,7 +24,7 @@ if [[ ! -d "${ksb_cargo_home}" ]]; then
     --no-modify-path \
     --component rust-src \
     --profile minimal \
-    --default-toolchain nightly-2024-03-22
+    --default-toolchain ${DEFAULT_RUST_TOOLCHAIN}
 fi
 
 mkdir -p "${CARGO_TARGET_DIR}"

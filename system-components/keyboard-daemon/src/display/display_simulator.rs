@@ -1,19 +1,21 @@
-use crate::display::Display;
-use crate::midi_sender::MidiEvent;
-use crate::user_interface::{Button, UIEvent};
+use std::process::exit;
+
 use anyhow::anyhow;
 use crossbeam::channel::Sender;
 use embedded_graphics::draw_target::DrawTarget;
+use embedded_graphics::Pixel;
 use embedded_graphics::pixelcolor::BinaryColor;
 use embedded_graphics::prelude::*;
 use embedded_graphics::primitives::Rectangle;
-use embedded_graphics::Pixel;
-use embedded_graphics_simulator::sdl2::Keycode;
 use embedded_graphics_simulator::{
     BinaryColorTheme, OutputSettingsBuilder, SimulatorDisplay, SimulatorEvent, Window,
 };
-use std::process::exit;
+use embedded_graphics_simulator::sdl2::Keycode;
 use midly::num::u7;
+
+use crate::display::Display;
+use crate::midi_sender::MidiEvent;
+use crate::user_interface::{Button, UIEvent};
 
 pub fn new_display() -> impl Display {
     FakeDisplay::new()
@@ -167,10 +169,10 @@ fn ui_event(ui_channel: &Sender<UIEvent>, down: bool, button: Button) -> anyhow:
 
 fn midi_key_event(midi_channel: &Sender<MidiEvent>, down: bool, pitch: u8) -> anyhow::Result<()> {
     midi_channel.send(if down {
-       MidiEvent::NoteOn {
-           key: u7::new(pitch),
-           vel: u7::new(127/2)
-       }
+        MidiEvent::NoteOn {
+            key: u7::new(pitch),
+            vel: u7::new(127 / 2),
+        }
     } else {
         MidiEvent::NoteOff {
             key: u7::new(pitch),
