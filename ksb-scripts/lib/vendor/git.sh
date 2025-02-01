@@ -11,6 +11,8 @@ function git_should_update() {
     dep_dir=$1
     dep_version=$2
 
+    git_in "${dep_dir}" fetch
+
     if [ "$(git_in "${dep_dir}" rev-parse HEAD)" = "${dep_version}" ]; then
         return 1
     else
