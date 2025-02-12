@@ -1,6 +1,8 @@
 use std::thread;
+use std::thread::JoinHandle;
 use std::time::Duration;
 
+use anyhow::Result;
 use crossbeam::channel::Sender;
 use midly::num::u7;
 use rppal::gpio::{Event, Gpio, Trigger};
@@ -23,7 +25,7 @@ const B_GPIO_PIN: u8 = 13;
 pub fn start_gpio_driver(
     midi_channel: Sender<MidiEvent>,
     ui_channel: Sender<UIEvent>,
-) -> anyhow::Result<()> {
+) -> Result<JoinHandle<Result<()>>> {
     let gpio = Gpio::new()?;
     let debounce_duration = Some(Duration::from_millis(1));
 
@@ -44,7 +46,7 @@ pub fn start_gpio_driver(
     let mut b_pin = gpio.get(B_GPIO_PIN)?.into_input_pullup();
     b_pin.set_interrupt(Trigger::Both, debounce_duration)?;
 
-    thread::spawn(move || {
+    Ok(thread::spawn(move || {
         let pins = vec![
             &sustain_pin,
             &dpad_u_pin,
@@ -71,9 +73,7 @@ pub fn start_gpio_driver(
                 _ => {}
             }
         }
-    });
-
-    Ok(())
+    }))
 }
 
 fn send_button_event(ui_channel: &Sender<UIEvent>, interrupt: Event, button: Button) {

@@ -1,12 +1,13 @@
-use std::{fs, thread};
-use std::io::{Read, stderr, stdout, Write};
+use std::io::{stderr, stdout, Read, Write};
 use std::process::Command;
-use std::thread::sleep;
+use std::thread::{sleep, JoinHandle};
 use std::time::Duration;
+use std::{fs, thread};
 
+use anyhow::Result;
 use crossbeam::channel::Sender;
-use midly::MidiMessage::{NoteOff, NoteOn};
 use midly::num::u7;
+use midly::MidiMessage::{NoteOff, NoteOn};
 
 use rs_tty::TTY;
 
@@ -19,14 +20,13 @@ const FIRMWARE_BIN: &str = "/usr/share/key-firmware.elf";
 const FIRMWARE_VERSION: &str = "/usr/share/key-firmware-version.txt";
 const FIRMWARE_HEADER: &str = "I am a keyboard! :3 ";
 
-pub fn start_keybed_driver(midi_channel: Sender<MidiEvent>) -> anyhow::Result<()> {
-    let expected_firmware_version =
-        fs::read_to_string(FIRMWARE_VERSION).expect("Could not read expected firmware version");
+pub fn start_keybed_driver(midi_channel: Sender<MidiEvent>) -> Result<JoinHandle<Result<()>>> {
+    let expected_firmware_version = fs::read_to_string(FIRMWARE_VERSION)?;
 
     let mut serial = TTY::open(SERIAL_DEVICE, SERIAL_BAUD);
-    serial.flush().expect("Couldn't flush serial port");
+    serial.flush()?;
 
-    thread::spawn(move || {
+    Ok(thread::spawn(move || {
         let vel_curve = pow_curve(2.0);
 
         let buffer = [0u8; 3];
@@ -65,9 +65,7 @@ pub fn start_keybed_driver(midi_channel: Sender<MidiEvent>) -> anyhow::Result<()
                 }
             }
         }
-    });
-
-    Ok(())
+    }))
 }
 
 fn flash_firmware(serial: TTY) -> TTY {

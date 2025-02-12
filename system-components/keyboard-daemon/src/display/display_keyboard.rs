@@ -5,9 +5,9 @@ use embedded_graphics::pixelcolor::BinaryColor;
 use embedded_graphics::prelude::*;
 use embedded_graphics::primitives::Rectangle;
 use rppal::i2c::I2c;
-use ssd1306::{I2CDisplayInterface, Ssd1306};
 use ssd1306::mode::BufferedGraphicsMode;
 use ssd1306::prelude::*;
+use ssd1306::{I2CDisplayInterface, Ssd1306};
 
 use crate::display::Display;
 

@@ -3,14 +3,14 @@ use std::process::exit;
 use anyhow::anyhow;
 use crossbeam::channel::Sender;
 use embedded_graphics::draw_target::DrawTarget;
-use embedded_graphics::Pixel;
 use embedded_graphics::pixelcolor::BinaryColor;
 use embedded_graphics::prelude::*;
 use embedded_graphics::primitives::Rectangle;
+use embedded_graphics::Pixel;
+use embedded_graphics_simulator::sdl2::Keycode;
 use embedded_graphics_simulator::{
     BinaryColorTheme, OutputSettingsBuilder, SimulatorDisplay, SimulatorEvent, Window,
 };
-use embedded_graphics_simulator::sdl2::Keycode;
 use midly::num::u7;
 
 use crate::display::Display;

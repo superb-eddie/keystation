@@ -1,5 +1,5 @@
 use std::fs;
-use std::io::{Read, stderr, stdout};
+use std::io::{stderr, stdout, Read};
 use std::path::PathBuf;
 use std::process::Command;
 
