@@ -50,8 +50,8 @@ if [[ ! -d "${toolchain_install_dir}" ]] || [[ ! -d "${toolchain_build_dir}" ]];
     rm -rf "${toolchain_install_dir}"
   fi
 
-#  crosstool_cache_dir="${KSB_CACHE_DIR}/crosstool"
-#  mkdir -p "${crosstool_cache_dir}"
+  crosstool_cache_dir="${KSB_CACHE_DIR}/crosstool"
+  mkdir -p "${crosstool_cache_dir}"
 
   log_section "Installing ${toolchain_name}"
   mkdir -p "${toolchain_build_dir}"
@@ -60,9 +60,12 @@ if [[ ! -d "${toolchain_install_dir}" ]] || [[ ! -d "${toolchain_build_dir}" ]];
   # Run in a subshell to not pollute environment (this script will be sourced)
   {
     export CT_PREFIX="${crosstool_toolchains_dir}"
-#    export CT_LOCAL_TARBALLS_DIR="${crosstool_cache_dir}" TODO
     export PATH="${crosstool_install_dir}/bin:${PATH}"
     ct-ng "${toolchain_name}"
+
+    # Update download dir so they don't get cleaned
+    sed -i -r 's?^(CT_LOCAL_TARBALLS_DIR=)(.*)$?\1"'"${crosstool_cache_dir}"'"?' .config
+
     ct-ng build
   }
 

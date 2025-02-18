@@ -21,6 +21,9 @@ export BR2_DL_DIR="${ksb_buildroot_cache_dir}/dl"
 export BR2_CCACHE_DIR="${ksb_buildroot_cache_dir}/ccache"
 export BR2_USE_CCACHE=1
 
+# All cargo deps get vendored into the same directory before building
+export KSB_CARGO_VENDOR_DIR="${ksb_buildroot_cache_dir}/cargo-vendor"
+
 cmd="${1:-}"
 if [[ "${cmd}" == "" ]]; then
     log_warning "No command given"
