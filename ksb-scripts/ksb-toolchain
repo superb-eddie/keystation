@@ -66,6 +66,10 @@ if [[ ! -d "${toolchain_install_dir}" ]] || [[ ! -d "${toolchain_build_dir}" ]];
     # Update download dir so they don't get cleaned
     sed -i -r 's?^(CT_LOCAL_TARBALLS_DIR=)(.*)$?\1"'"${crosstool_cache_dir}"'"?' .config
 
+    # Not the best place for this semantically.
+    # Disables building gdb with python
+    sed -i -r 's?CT_GDB_CROSS_PYTHON=y?CT_GDB_CROSS_PYTHON=n?' .config
+
     ct-ng build
   }
 
