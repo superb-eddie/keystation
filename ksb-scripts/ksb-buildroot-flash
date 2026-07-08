@@ -24,10 +24,8 @@ case "${target}" in
 esac
 
 update_keystation() {
-#  TODO: ksb-cargo?
-  cargo build --bin tricorder --manifest-path "${KSB_PROJECT_ROOT}/system-components/Cargo.toml"
-  tricorder="${KSB_PROJECT_ROOT}/system-components/target/debug/tricorder"
-
+  ksb-cargo build --bin tricorder --manifest-path "${KSB_PROJECT_ROOT}/system-components/Cargo.toml"
+  tricorder="${KSB_BUILD_DIR}/cargo-target/debug/tricorder"
 
   if ! $tricorder ping; then
     log_fatal "Couldn't ping keystation"
