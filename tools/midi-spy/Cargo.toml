@@ -1,7 +1,0 @@
-[package]
-name = "midi-spy"
-version = "0.1.0"
-edition = "2021"
-
-[dependencies]
-midir = { version = "0.10.0" }
