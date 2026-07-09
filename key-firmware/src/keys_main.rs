@@ -2,26 +2,20 @@
 #![no_main]
 #![feature(abi_avr_interrupt)]
 
-use arduino_hal::{default_serial, pins, Usart};
-use arduino_hal::hal::port::{PD0, PD1};
-use arduino_hal::pac::USART0;
-use arduino_hal::port::mode::{Floating, Input, Output};
+use arduino_hal::{pins};
+use arduino_hal::port::mode::{Floating, Input};
 use arduino_hal::port::Pin;
-use arduino_hal::prelude::*;
 use avr_device::atmega328p::Peripherals;
 
-use shift::ShiftRegister;
-
+use crate::shift::ShiftRegister;
 use crate::keybed::{Key, Keybed};
 use crate::millis::millis_init;
+use crate::serial::{write_string, Serial};
 
 mod keybed;
 mod millis;
 mod shift;
-
-const SERIAL_BAUD: u32 = 115_200;
-type Serial = Usart<USART0, Pin<Input, PD0>, Pin<Output, PD1>>;
-panic_serial::impl_panic_handler!(Serial);
+mod serial;
 
 const FIRMWARE_VERSION: &str = concat!(
     "I am a keyboard! :3 ",
@@ -32,16 +26,6 @@ const FIRMWARE_VERSION: &str = concat!(
 );
 
 // A serial message may start with either a 'D', 'U', 'V' or 'P'
-
-fn write_string(serial: &mut Serial, value: &str) {
-    let str_len = value.len();
-    assert!(
-        str_len < u8::MAX as usize,
-        "String must be less than 255 characters"
-    );
-    serial.write_byte(str_len as u8);
-    serial.write_str(value).unwrap()
-}
 
 fn send_version(serial: &mut Serial) {
     serial.write_byte(b'V');
@@ -63,8 +47,7 @@ fn send_note_up(serial: &mut Serial, key_index: u8) {
 fn main() -> ! {
     let dp = Peripherals::take().unwrap();
     let pins = pins!(dp);
-    let serial = default_serial!(dp, pins, SERIAL_BAUD);
-    let serial = share_serial_port_with_panic(serial);
+    let serial = serial_init!(dp, pins);
 
     unsafe { avr_device::interrupt::enable() };
     millis_init(dp.TC0);

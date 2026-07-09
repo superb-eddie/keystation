@@ -24,6 +24,8 @@ mod display;
 mod gpio_driver;
 #[cfg(feature = "keyboard")]
 mod keybed_driver;
+#[cfg(feature = "keyboard")]
+mod dial_driver;
 mod midi_sender;
 mod user_interface;
 
@@ -35,10 +37,13 @@ fn start_input_drivers(
 ) -> Result<()> {
     use crate::gpio_driver::start_gpio_driver;
     use crate::keybed_driver::start_keybed_driver;
+    use crate::dial_driver::start_dial_driver;
 
     threads.push(start_gpio_driver(midi_channel.clone(), ui_channel.clone())?);
 
     threads.push(start_keybed_driver(midi_channel.clone())?);
+
+    threads.push(start_dial_driver(midi_channel.clone())?);
 
     Ok(())
 }

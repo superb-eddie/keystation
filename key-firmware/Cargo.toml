@@ -8,6 +8,13 @@ build = "build.rs"
 name = "key-firmware"
 test = false
 bench = false
+path = "src/keys_main.rs"
+
+[[bin]]
+name = "dial-firmware"
+test = false
+bench = false
+path = "src/dials_main.rs"
 
 [build-dependencies]
 chrono = "0.4.19"
