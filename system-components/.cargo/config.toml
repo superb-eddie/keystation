@@ -1,0 +1,2 @@
+[env]
+PKG_CONFIG_PATH = { value = "./../.ksb/build/buildroot/staging/usr/lib/pkgconfig", relative = true }

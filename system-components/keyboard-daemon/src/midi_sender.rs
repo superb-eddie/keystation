@@ -3,11 +3,11 @@ use std::thread::JoinHandle;
 
 use anyhow::Result;
 use crossbeam::channel::Receiver;
-use midir::MidiOutput;
 use midir::os::unix::VirtualOutput;
+use midir::MidiOutput;
 use midly::live::LiveEvent;
-use midly::MidiMessage;
 use midly::num::u4;
+use midly::MidiMessage;
 
 const MIDI_CLIENT_NAME: &str = "keystation";
 const MIDI_PORT_NAME: &str = "midi_out";

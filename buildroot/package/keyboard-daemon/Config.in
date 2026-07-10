@@ -3,7 +3,8 @@ config BR2_PACKAGE_KEYBOARD_DAEMON
     depends on BR2_PACKAGE_HOST_RUSTC_TARGET_ARCH_SUPPORTS
 	depends on BR2_PACKAGE_JACK2
     select BR2_PACKAGE_HOST_RUSTC
-    select BR2_PACKAGE_KEY_FIRMWARE
+    select BR2_PACKAGE_KEYBOARD_FIRMWARE
+    select BR2_PACKAGE_DIALS_FIRMWARE
     select BR2_PACKAGE_JACK_TOOLS
 	help
 	    Daemon for all keyboard functions 

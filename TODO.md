@@ -1,33 +1,19 @@
 # TODO
 - repo
   - Thorough readme with goals/plans/pictures
+- build system
+  - unify caches and downloads between rust invoked by editor, ksb, and buildroot
+    - Maybe vendor deps for everything outside of buildroot as well 
 - firmware
   - increase timer accuracy
   - enable watchdog timer
 - operating system
   - decrease boot time
-  - expose patch folder over usb
-  - components
-    - key-driver
-      - replace libc with existing safe wrappers
-      - implement velocity calculations
-      - read inputs from buttons/controls on keyboard
-    - keystation
-      - expose an api for other components to control the system
-      - expose the same api over a second usb serial port 
-      - absorb patch-loader functionality
-      - support rootfs updating/switching
-      - support boot partition updating
-    - key-controller
-      - absorb screen responsibility
-      - read inputs next to screen
-      - show UI to control the system
+  - Rip out cardinal, replace with open source vst instruments
+  - keyboard-daemon
+    - replace libc with existing safe wrappers
+    - revisit velocity calculations
+    - screen
+      - Some animation when inputs happen
+      - Ability to switch onboard instruments
       - show screensaver when UI hasn't updated in a while (OLED burn in prevention)
-- hardware
-  - connect buttons on OLED board
-  - connect buttons+led on keyboard
-  - find ADC for analog controls
-  - replace keys with an isomorphic layout
-    - replicate key mechanism in CAD
-    - janko
-    - flat bars

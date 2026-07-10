@@ -1,8 +1,8 @@
 .DS_Store
 .idea/
 
-/**/target/
-/.ksb/
+**/target/
+.ksb/
 
 # Contains hardware references. A lot of pictures and other binary files
 models/

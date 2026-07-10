@@ -1,0 +1,22 @@
+[package]
+name = "dials"
+version = "0.1.0"
+edition = "2021"
+build = "build.rs"
+
+[[bin]]
+name = "dials"
+test = false
+bench = false
+
+[build-dependencies]
+chrono = "0.4.19"
+
+[dependencies]
+shared = { path = "../shared" }
+avr-device = { version = "0.5.4"}
+
+[dependencies.arduino-hal]
+git = "https://github.com/rahix/avr-hal"
+rev = "3e362624547462928a219c40f9ea8e3a64f21e5f"
+features = ["arduino-nano"]

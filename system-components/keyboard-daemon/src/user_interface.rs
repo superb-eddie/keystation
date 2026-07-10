@@ -1,18 +1,12 @@
 use std::time::Duration;
 
+use crate::io::{Display, IO};
 use crossbeam::channel::{select_biased, tick, Receiver};
 use embedded_graphics::pixelcolor::BinaryColor;
 use embedded_graphics::prelude::*;
 use embedded_graphics::primitives::{
     Circle, PrimitiveStyle, PrimitiveStyleBuilder, Rectangle, StyledDrawable, Triangle,
 };
-
-use crate::display::Display;
-
-const SCREEN_WIDTH: f32 = 128.0;
-const SCREEN_HEIGHT: f32 = 64.0;
-
-const KEYSTATION_SCROLL_BMP: &[u8] = include_bytes!("../assets/keystation_scroll.bmp");
 
 pub enum Button {
     DpadUp,
@@ -22,9 +16,6 @@ pub enum Button {
     DpadCenter,
     A,
     B,
-    AdvancedFunctions,
-    OctaveMinus,
-    OctavePlus,
 }
 
 pub enum UIEvent {
@@ -81,8 +72,8 @@ impl UIState {
     }
 }
 
-pub fn do_ui<D: Display>(
-    display: &mut D,
+pub fn do_ui<I: IO<D>, D: Display>(
+    mut io: I,
     event_channel: Receiver<UIEvent>,
     mut frame_hook: impl FnMut(),
 ) -> ! {
@@ -94,7 +85,7 @@ pub fn do_ui<D: Display>(
     loop {
         select_biased! {
             recv(frame_tick) -> _ => {
-                render(display, &state);
+                render(io.get_display(), &state);
                 frame_hook()
             },
             recv(event_channel) -> e => state.process_event(e.unwrap()),

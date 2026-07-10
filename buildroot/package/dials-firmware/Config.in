@@ -1,0 +1,4 @@
+config BR2_PACKAGE_DIALS_FIRMWARE
+	bool "dials-firmware"
+	help
+	    Firmware binaries for arduino under the dials

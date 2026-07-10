@@ -1,4 +1,4 @@
-use crate::display::Display;
+use crate::io::Display;
 use embedded_graphics::image::Image;
 use embedded_graphics::prelude::*;
 use std::thread::sleep;

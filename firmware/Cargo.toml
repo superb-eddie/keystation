@@ -1,0 +1,26 @@
+[workspace]
+resolver = "2"
+members = [
+    "keyboard",
+    "dials",
+    "shared"
+]
+
+# https://github.com/Rahix/avr-hal/issues/131
+#[profile.dev.package.compiler_builtins]
+#overflow-checks = false
+#
+#[profile.release.package.compiler_builtins]
+#overflow-checks = false
+
+# Configure the build for minimal size - AVRs have very little program memory
+[profile.dev]
+lto = true
+opt-level = "s"
+
+[profile.release]
+codegen-units = 1
+debug = true
+lto = true
+opt-level = "s"
+

@@ -1,0 +1,18 @@
+[package]
+name = "shared"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+name = "shared"
+test = false
+bench = false
+
+[dependencies]
+panic-serial = { version = "0.1.2", features = ["full"] }
+avr-device = { version = "0.5.4"}
+
+[dependencies.arduino-hal]
+git = "https://github.com/rahix/avr-hal"
+rev = "3e362624547462928a219c40f9ea8e3a64f21e5f"
+features = ["arduino-nano"]

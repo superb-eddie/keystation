@@ -1,0 +1,4 @@
+config BR2_PACKAGE_KEYBOARD_FIRMWARE
+	bool "keyboard-firmware"
+	help
+	    Firmware binaries for arduino under the keys
