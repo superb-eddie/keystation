@@ -2,7 +2,7 @@
 #![no_main]
 #![feature(abi_avr_interrupt)]
 
-use crate::keybed::{Key, Keybed};
+use crate::keybed::{KeyState, Keybed};
 use crate::shift::ShiftRegister;
 use arduino_hal::port::mode::{Floating, Input};
 use arduino_hal::port::Pin;
@@ -54,9 +54,10 @@ fn main() -> ! {
 
     let mut keybed = keybed_init!(pins);
     loop {
+        // TODO: Scan should instead collect a list of which keys changed so we can send the messages in bulk
         keybed.scan(|key, state| match state {
-            Key::Up => send_note_up(serial, key as u8),
-            Key::Down(travel_time) => send_note_down(serial, key as u8, travel_time as u8),
+            KeyState::Up => send_note_up(serial, key as u8),
+            KeyState::Down(travel_time) => send_note_down(serial, key as u8, travel_time as u8),
             _ => {}
         });
     }

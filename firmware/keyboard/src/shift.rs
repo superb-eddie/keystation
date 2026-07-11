@@ -9,11 +9,11 @@ pub struct ShiftRegister {
 
 impl ShiftRegister {
     pub fn new(enable: Pin<Output>, input: Pin<Output>, clock: Pin<Output>) -> Self {
-        return Self {
+        Self {
             enable,
             input,
             clock,
-        };
+        }
     }
 
     pub fn enable(&mut self) {

@@ -9,7 +9,7 @@ use shared::millis::millis;
 
 const KEYS: usize = 49;
 
-// Ownership rules means we can't just pass `pins` to the constructor, a macro gets around that
+// Borrow checker won't let constructor borrow Pins and it would be cumbersome to do this elsewhere
 #[macro_export]
 macro_rules! keybed_init {
     ( $p:expr ) => {{
@@ -44,7 +44,7 @@ macro_rules! keybed_init {
 }
 
 #[derive(Copy, Clone)]
-pub enum Key {
+pub enum KeyState {
     // Key goes through these states in order
     // B up, A up
     Up,
@@ -63,7 +63,7 @@ pub struct Keybed {
     keys_a: [Pin<Input<Floating>>; 7],
     keys_b: [Pin<Input<Floating>>; 7],
 
-    pub keys: [Key; KEYS],
+    pub key_states: [KeyState; KEYS],
 }
 
 impl Keybed {
@@ -74,87 +74,87 @@ impl Keybed {
     ) -> Self {
         shift.enable();
 
-        return Self {
+        Self {
             shift,
             keys_a,
             keys_b,
-            keys: [Key::Up; KEYS],
-        };
+            key_states: [KeyState::Up; KEYS],
+        }
     }
 
-    fn next_state(a_down: bool, b_down: bool, key: Key) -> Option<Key> {
+    fn next_state(a_down: bool, b_down: bool, state: KeyState) -> Option<KeyState> {
+        // There are two contacts under each key.
+        // As a key is pressed down it will first touch contact B, then it will contact A
+
         // | B | A | STATE | NEW_STATE | DESC                                        |
         // |---|---|-------|-----------|---------------------------------------------|
-        // | 0 | 0 | Up    | -         | Key is in the neutral position              |
+        // | 0 | 0 | Up    | Up        | Key is in the neutral position              |
         // | 1 | 0 | Up    | DownP     | A key press has started                     |
-        // | 0 | 1 | Up    | -         | Physically impossible                       |
+        // | 0 | 1 | Up    | Up        | Physically impossible                       |
         // | 1 | 1 | Up    | Down      | Key was pressed faster than we could detect |
         // | 0 | 0 | DownP | Up        | Key was pressed halfway, then released      |
-        // | 1 | 0 | DownP | -         | Key is travelling                           |
+        // | 1 | 0 | DownP | DownP     | Key is travelling                           |
         // | 0 | 1 | DownP | Up        | Physically impossible                       |
         // | 1 | 1 | DownP | Down      | Key was pressed all the way                 |
         // | 0 | 0 | Down  | Up        | Key press has finished                      |
-        // | 1 | 0 | Down  | -         | Key has been released                       |
+        // | 1 | 0 | Down  | Down      | Key has been released                       |
         // | 0 | 1 | Down  | Up        | Physically impossible.                      |
-        // | 1 | 1 | Down  | -         | Key is being held down                      |
+        // | 1 | 1 | Down  | Down      | Key is being held down                      |
 
-        return match (b_down, a_down, key) {
-            (true, false, Key::Up) => {
-                // Key is being pressed
-                Some(Key::DownPartial(millis()))
-            }
-            (true, true, Key::DownPartial(at)) => {
-                // Key was fully pressed
-                let travel_time = millis().saturating_sub(at);
-                Some(Key::Down(travel_time))
-            }
-            (true, true, Key::Up) => {
-                // Key was fully depressed before we could register the DownPartial
-                // Report as the smallest resolution
-                Some(Key::Down(2))
-            }
-            (false, _, _) => {
-                // If contact b is up, the key should be up
-                Some(Key::Up)
-            }
+        match (b_down, a_down, state) {
+            // Key touched first contact
+            (true, false, KeyState::Up) => Some(KeyState::DownPartial(millis())),
+            // Key touched both contacts, calculate travel time
+            (true, true, KeyState::DownPartial(at)) => Some(KeyState::Down(millis().saturating_sub(at))),
+            // Key touched both contacts before we could register the first, report as the smallest resolution
+            (true, true, KeyState::Up) => Some(KeyState::Down(2)),
+            // Key is always up if the first contact is up
+            (false, _, _) => Some(KeyState::Up),
+            // Anything else is either impossible or shouldn't change the current state
             _ => None,
-        };
+        }
     }
 
-    pub fn scan(&mut self, mut key_update: impl FnMut(usize, Key)) {
-        // Scan key matrix
-        // self.shift.enable();
+    // Scan key matrix
+    pub fn scan(&mut self, mut key_update: impl FnMut(usize, KeyState)) {
+
+        // The keybed has 8 sections
         for i in 0..8 {
+            // The shift register is used to select each section of the keybed in order
             if i == 0 {
                 self.shift.push_high()
             } else {
                 self.shift.push_low()
             }
+
+            // Each section of the keybed has 7 keys
             for j in 0..7 {
-                // Calculate a key index where the leftmost key is 0
+                // Calculate index of key_state
+                // The leftmost key on the keyboard is 0 and the rightmost key is KEYS-1
+                // This calculation is funky because I wired things bad, it could be made simple with some work
                 let (key_index, _) =
                     ((j * 8) + (if i == 0 { 8usize } else { i })).overflowing_sub(1);
                 if key_index >= KEYS {
-                    //  This matrix supports more keys than we actually have
+                    // This matrix supports more keys than we actually have
+                    // We can't break because key_index does not increase sequentially with every iteration
                     continue;
                 }
 
                 let a_down = self.keys_a[j].is_high();
                 let b_down = self.keys_b[j].is_high();
 
-                let state = self.keys[key_index];
+                let state = self.key_states[key_index];
                 if let Some(new_state) = Self::next_state(a_down, b_down, state) {
                     match (state, new_state) {
                         // Down state is always reported
-                        (_, Key::Down(_)) => key_update(key_index, new_state),
+                        (_, KeyState::Down(_)) => key_update(key_index, new_state),
                         // Up state is only reported when key had been fully depressed
-                        (Key::Down(_), Key::Up) => key_update(key_index, new_state),
+                        (KeyState::Down(_), KeyState::Up) => key_update(key_index, new_state),
                         _ => {}
                     }
-                    self.keys[key_index] = new_state
+                    self.key_states[key_index] = new_state
                 }
             }
         }
-        // self.shift.disable();
     }
 }
