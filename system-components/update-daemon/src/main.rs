@@ -70,7 +70,7 @@ fn reboot() -> Result<()> {
 }
 
 fn main() {
-    let mut serial = TTY::open(SERIAL_DEVICE, SERIAL_BAUD);
+    let mut serial = TTY::open(SERIAL_DEVICE, SERIAL_BAUD).expect("Failed to open serial device");
 
     println!("Starting!");
     let buffer: &mut [u8] = &mut [0u8; 255];
@@ -79,10 +79,9 @@ fn main() {
             Err(e) => {
                 eprintln!("{}", e);
 
-                // Who know what kinda garbage we're seeing
-                // Reopening the TTY will give us a "clean slate"
+                // Reopen the TTY for hopefully a clean slate
                 drop(serial);
-                serial = TTY::open(SERIAL_DEVICE, SERIAL_BAUD);
+                serial = TTY::open(SERIAL_DEVICE, SERIAL_BAUD).expect("Failed to open serial device");
 
                 continue;
             }

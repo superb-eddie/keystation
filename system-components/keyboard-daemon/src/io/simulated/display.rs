@@ -28,7 +28,7 @@ pub struct DisplayImpl {
 impl DisplayImpl {
     pub fn new(
         midi_channel: Sender<MidiEvent>,
-        ui_channel: Sender<UIEvent>
+        ui_channel: Sender<UIEvent>,
     ) -> Self {
         let display = SimulatorDisplay::<BinaryColor>::new(Size::new(128, 64));
 
@@ -52,7 +52,7 @@ impl DrawTarget for DisplayImpl {
 
     fn draw_iter<I>(&mut self, pixels: I) -> Result<(), Self::Error>
     where
-        I: IntoIterator<Item = Pixel<Self::Color>>,
+        I: IntoIterator<Item=Pixel<Self::Color>>,
     {
         self.display.draw_iter(pixels).map_err(|e| anyhow!(e))
     }

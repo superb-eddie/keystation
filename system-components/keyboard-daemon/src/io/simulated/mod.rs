@@ -10,16 +10,15 @@ mod display;
 pub fn init_io(
     threads: &mut Threads,
     midi_channel: Sender<MidiEvent>,
-    ui_channel: Sender<UIEvent>
+    ui_channel: Sender<UIEvent>,
 ) -> Result<impl crate::io::IO<DisplayImpl>> {
-
     Ok(IO {
         display: DisplayImpl::new(midi_channel, ui_channel),
     })
 }
 
 pub struct IO {
-    display: DisplayImpl
+    display: DisplayImpl,
 }
 
 impl crate::io::IO<DisplayImpl> for IO {

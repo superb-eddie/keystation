@@ -14,7 +14,7 @@ chrono = "0.4.19"
 
 [dependencies]
 shared = { path = "../shared" }
-avr-device = { version = "0.5.4"}
+avr-device = { version = "0.5.4" }
 
 [dependencies.arduino-hal]
 git = "https://github.com/rahix/avr-hal"

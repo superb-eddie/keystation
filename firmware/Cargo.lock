@@ -300,15 +300,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "9f7c3e4beb33f85d45ae3e3a1792185706c8e16d043238c593331cc7cd313b50"
 
 [[package]]
-name = "panic-serial"
-version = "0.1.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c3afc60d58b0825ea32dd8d8a2796098f7b87ad3b9392cace3b6dc79e450afd9"
-dependencies = [
- "ufmt",
-]
-
-[[package]]
 name = "paste"
 version = "1.0.15"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -350,7 +341,7 @@ version = "0.1.0"
 dependencies = [
  "arduino-hal",
  "avr-device",
- "panic-serial",
+ "ufmt",
 ]
 
 [[package]]

@@ -33,7 +33,7 @@ impl DrawTarget for DisplayImpl {
 
     fn draw_iter<I>(&mut self, pixels: I) -> Result<(), Self::Error>
     where
-        I: IntoIterator<Item = Pixel<Self::Color>>,
+        I: IntoIterator<Item=Pixel<Self::Color>>,
     {
         self.0.draw_iter(pixels).map_err(|e| anyhow!("{:?}", e))
     }

@@ -15,7 +15,7 @@ pub trait IO<D: Display> {
     fn get_display(&mut self) -> &mut D;
 }
 
-pub trait Display: DrawTarget<Color = BinaryColor, Error = anyhow::Error> {
+pub trait Display: DrawTarget<Color=BinaryColor, Error=anyhow::Error> {
     fn clear_buffer(&mut self);
     fn flush(&mut self) -> anyhow::Result<()>;
 }

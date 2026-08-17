@@ -8,28 +8,28 @@ use crate::Threads;
 use anyhow::Result;
 use crossbeam::channel::Sender;
 
-mod keyboard_driver;
+mod arduino;
 mod dials_driver;
-mod gpio_driver;
 pub(crate) mod display;
+mod gpio_driver;
+mod keyboard_driver;
 
 pub fn init_io(
     threads: &mut Threads,
     midi_channel: Sender<MidiEvent>,
-    ui_channel: Sender<UIEvent>
+    ui_channel: Sender<UIEvent>,
 ) -> Result<impl crate::io::IO<DisplayImpl>> {
-
     threads.push(start_gpio_driver(midi_channel.clone(), ui_channel.clone())?);
     threads.push(start_dials_driver(midi_channel.clone())?);
     threads.push(start_keyboard_driver(midi_channel.clone())?);
 
     Ok(IO {
-        display: DisplayImpl::new()
+        display: DisplayImpl::new(),
     })
 }
 
 pub struct IO {
-    display: DisplayImpl
+    display: DisplayImpl,
 }
 
 impl crate::io::IO<DisplayImpl> for IO {

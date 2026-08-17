@@ -9,8 +9,9 @@ test = false
 bench = false
 
 [dependencies]
-panic-serial = { version = "0.1.2", features = ["full"] }
-avr-device = { version = "0.5.4"}
+#panic-serial = { version = "0.1.2", features = ["full"] }
+avr-device = { version = "0.5.4" }
+ufmt = "0.2.0"
 
 [dependencies.arduino-hal]
 git = "https://github.com/rahix/avr-hal"

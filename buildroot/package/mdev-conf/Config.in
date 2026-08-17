@@ -1,0 +1,4 @@
+config BR2_PACKAGE_MDEV_CONF
+	bool "mdev-conf"
+	help
+	    Configures mdev to assign persistent dev names to the two arduinos

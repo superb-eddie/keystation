@@ -12,8 +12,7 @@ fn send_message(socket: &UdpSocket, addr: impl Into<String>, args: Vec<OscType>)
     let msg_buf = encoder::encode(&OscPacket::Message(OscMessage {
         addr: addr.into(),
         args,
-    }))
-    .expect("Can't encode message");
+    })).expect("Can't encode message");
 
     socket
         .send_to(&msg_buf, CARDINAL_ADDRESS)
